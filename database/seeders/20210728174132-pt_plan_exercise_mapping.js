@@ -13,9 +13,17 @@ module.exports = {
 	},
 	{
 		pt_plan_id:1,
-		exercise_id:1,
+		exercise_id:2,
 		exercise_date:'2021-07-29',
 		exercise_order:2,
+		createdAt:new Date(),
+        updatedAt:new Date()
+	},
+	{	
+		pt_plan_id:1,
+		exercise_id:3,
+		exercise_date:'2021-07-29',
+		exercise_order:3,
 		createdAt:new Date(),
         updatedAt:new Date()
 	}], {});
