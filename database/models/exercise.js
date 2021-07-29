@@ -7,8 +7,9 @@ module.exports = (sequelize, DataTypes) => {
     video_id: DataTypes.INTEGER,
     calorie: DataTypes.FLOAT,
     playtime: DataTypes.FLOAT,
-    effect: DataTypes.TEXT
-  }, {});
+    effect: DataTypes.TEXT,
+	thumbnail:DataTypes.STRING	
+}, {});
   exercise.associate = function(models){
 
 	exercise.belongsTo(models.video, {

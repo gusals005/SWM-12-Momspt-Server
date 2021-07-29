@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var db = require("../database/models");
-var user = db.body_type;
+var user = db.user;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
