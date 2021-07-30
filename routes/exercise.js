@@ -26,6 +26,11 @@ router.get('/todayexerciselist', async function(req,res,next){
 				],
 				attributes:{exclude:['id','createdAt','updatedAt']},
 				where:{ exercise_date: req.query.date}});
+	
+	if(mapping.length == 0){
+		res.status(500).json({err_message : 'invalid input'});
+	}
+	
 
 	res.status(200).send(mapping);
 })
