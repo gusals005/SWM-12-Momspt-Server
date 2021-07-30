@@ -33,5 +33,23 @@ router.get('/todayexerciselist', async function(req,res,next){
 	
 
 	res.status(200).send(mapping);
-})
+});
+
+router.post('/sendresult', async function(req,res,next){
+	
+	var	compare_date = new Date(req.body.date);
+	var mapping = await PEmapping.findAll(
+			{
+				include : [
+				{ model: Exercise,as:'exercise', attributes : ['name','explanation','type','calorie','playtime','effect','thumbnail']}
+				],
+				attributes:{exclude:['id','createdAt','updatedAt']},
+				where:{ '$exercise.name$':req.body.exercisename, exercise_date:req.body.date}});
+
+	if(mapping.length == 0){
+		res.status(500).json({err_massage:'invalid input'});
+	}
+	res.status(200).send({"message":"send result success"});
+});
+
 module.exports = router;
