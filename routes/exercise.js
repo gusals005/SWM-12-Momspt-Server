@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var db = require("../database/models");
 var Exercise = db.exercise;
+var PEmapping = db.pt_plan_exercise_mapping
 
 /* GET home page. */
 router.get('/getinfo', async function(req, res, next) {
@@ -16,4 +17,16 @@ router.get('/getinfo', async function(req, res, next) {
 	//res.render('index', { title: 'Express' });
 });
 
+router.get('/todayexerciselist', async function(req,res,next){
+	
+	var mapping = await PEmapping.findAll(
+			{
+				include : [
+				{ model: Exercise, attributes : ['name','explanation','type','calorie','playtime','effect','thumbnail']}
+				],
+				attributes:{exclude:['id','createdAt','updatedAt']},
+				where:{ exercise_date: req.query.date}});
+
+	res.status(200).send(mapping);
+})
 module.exports = router;
