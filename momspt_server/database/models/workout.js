@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const exercise = sequelize.define('exercise', {
+  const workout  = sequelize.define('workout', {
     name: DataTypes.STRING,
     explanation: DataTypes.TEXT,
     type: DataTypes.STRING,
@@ -10,12 +10,12 @@ module.exports = (sequelize, DataTypes) => {
     effect: DataTypes.TEXT,
 	thumbnail:DataTypes.STRING	
 }, {});
-  exercise.associate = function(models){
+  workout.associate = function(models){
 
-	exercise.belongsTo(models.video, {
+	workout.belongsTo(models.video, {
 	  foreignKey: 'video_id',
 	  targetKey: 'id'
 	});
   };
-  return exercise;
+  return workout;
 };
