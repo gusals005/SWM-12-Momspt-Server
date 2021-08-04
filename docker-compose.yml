@@ -9,7 +9,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     restart: "unless-stopped"
   node1:
-    image: momspt_server:0.1.1
+    image: momspt_server:0.2.0
     container_name: node1
     expose:
       - "3000"
