@@ -1,18 +1,13 @@
-# [서버] Readme.md
-
 # MomsPT Server
-
----
 
 임산부를 위한 AI 기반 산후 재활운동 플랫폼, 맘스피티입니다.
 
 서버에서는 사용자가 어플을 이용하는 데 있어 필요한 모든 정보와 작업들을 지원합니다.
 
-# 시스템 아키텍쳐
+## 시스템 아키텍쳐
 
----
 
-![%5B%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%5D%20Readme%20md%20f778c826a1284a608ae24a9c64825ee8/%EC%8B%9C%EC%8A%A4%ED%85%9C%EC%95%84%ED%82%A4%ED%85%8D%EC%B3%90.png](%5B%E1%84%89%E1%85%A5%E1%84%87%E1%85%A5%5D%20Readme%20md%20f778c826a1284a608ae24a9c64825ee8/%EC%8B%9C%EC%8A%A4%ED%85%9C%EC%95%84%ED%82%A4%ED%85%8D%EC%B3%90.png)
+![시스템아키텍쳐](/uploads/ab54facff97d76ad09494dbf04b2f335/시스템아키텍쳐.PNG)
 
 ### Service server 기술 스택
 
@@ -30,11 +25,9 @@ Android 어플에서 서비스를 이용하기 위해 서비스 서버와 API �
 
 서버에서 Nginx 및 Node.js 서버에 대해서는 Docker를 활용하여 모두 이미지로 생성하고 컨테이너화 하고 있습니다. 추후에 사용자가 많아짐에 따라 유연하게 확장을 할 수 있는 아키텍쳐를 그리기 위해서 Docker를 사용하였고, 현재 컨테이너들끼리의 내부 통신을 위하여 Docker-compose를 통하여 컨테이너를 띄우고 있습니다. 추후에는 컨테이너들을 더 효율적으로 관리하기 위해 kubernetes를 활용할 계획입니다.
 
----
 
-# APIs
+## APIs
 
----
 
 제공하고 있는 API에 대한 정리입니다.
 
@@ -47,11 +40,11 @@ Android 어플에서 서비스를 이용하기 위해 서비스 서버와 API �
 
 - Url
 
-    /workout/todayworkoutlist
+    `/workout/todayworkoutlist`
 
 - Method
 
-    POST
+    `POST`
 
 - Request
 
@@ -71,15 +64,12 @@ Android 어플에서 서비스를 이용하기 위해 서비스 서버와 API �
 
 - Url
 
-    /workout/getinfo?name={name}
+    `/workout/getinfo?name={name}`
 
 - Method
 
-    GET
+    `GET`
 
-- Uri
-
-[URI 매개 변수](https://www.notion.so/f6ad05cb2988496e9f4de435ddc39a91)
 
 ### 3. **현재 운동의 좌표(키포인트) api**
 
@@ -91,15 +81,12 @@ Android 어플에서 서비스를 이용하기 위해 서비스 서버와 API �
 
 - Url
 
-    /getjson?name={name}
+    `/getjson?name={name}`
 
 - Method
 
-    GET
+    `GET`
 
-- Uri
-
-[URI 매개 변수](https://www.notion.so/0973340ee59d40d99f728134b9132317)
 
 ### 4. 출산 후 날짜 및 문구 제공 API
 
@@ -115,9 +102,6 @@ Android 어플에서 서비스를 이용하기 위해 서비스 서버와 API �
 
     GET
 
-- Uri
-
-[URI 매개 변수](https://www.notion.so/6633cc209cff420eb78c11fbbbcd876a)
 
 ### 5. 운동 동영상 받기 API
 
@@ -128,7 +112,6 @@ Android 어플에서 서비스를 이용하기 위해 서비스 서버와 API �
 - BaseURL : http://[d29r6pfiojlanv.cloudfront.net](http://d29r6pfiojlanv.cloudfront.net/)
 - ex)힙브릿지영상 → http://[d29r6pfiojlanv.cloudfront.net](http://d29r6pfiojlanv.cloudfront.net/)/hipbridge.mp4
 
-[운동 동영상](https://www.notion.so/e1fa905aee1e457d9f27f785895ea8ce)
 
 ### 운동 썸네일 받기 API
 
@@ -138,7 +121,6 @@ Android 어플에서 서비스를 이용하기 위해 서비스 서버와 API �
 
 - BaseURL : http://[d29r6pfiojlanv.cloudfront.net](http://d29r6pfiojlanv.cloudfront.net/)
 
-[운동 썸네일](https://www.notion.so/fac501ee761c4890a27867fa913e871b)
 
 ### 운동 후 결과 보내기 API
 
@@ -148,19 +130,9 @@ Android 어플에서 서비스를 이용하기 위해 서비스 서버와 API �
 
 - Url
 
-    /workout/sendresult
+    `/workout/sendresult`
 
 - Method
 
-    POST
+    `POST`
 
-- Request
-
-```json
-{
-    "username":"fit",
-    "workoutname":"hipbridge",
-    "date": "2021-07-30",
-    "score":"90"
-}
-```
