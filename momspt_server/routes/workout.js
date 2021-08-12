@@ -5,6 +5,7 @@ var Workout = db.workout;
 var Workout_set = db.workout_set;
 var H_pt_plan = db.history_pt_plan;
 var User = db.user;
+var H_workout = db.history_workout;
 
 /* GET home page. */
 router.get('/getinfo', async function(req, res, next) {
@@ -38,7 +39,7 @@ router.post('/todayworkoutlist', async function(req,res,next){
 	console.log(target_workout_set_id);
 
 	var workoutlist = await Workout_set.findAll({
-				include : [{model: Workout, attributes : ['name','explanation','type','calorie','playtime','effect','thumbnail']}],
+include : [{model: Workout, attributes : ['name','explanation','type','calorie','playtime','effect','thumbnail']}],
 				attributes:{exclude:['id','createdAt','updatedAt']},
 				where:{set_id:target_workout_set_id}
 			})
@@ -47,7 +48,17 @@ router.post('/todayworkoutlist', async function(req,res,next){
 				res.status(500).send({err_massage: "invalid input"});
 				});
 	
-	res.status(200).send(workoutlist);
+	var todayhistory = await H_workout.findAll({attributes:['isfinish','pause_time'], where:{user_id:user.dataValues.id, date:target_day, workout_set_id:target_workout_set_id}})
+
+	
+	var output = []
+	var idx = 0
+	workoutlist.forEach((element) => {
+		element.dataValues['history']=todayhistory[idx]
+		output.push(element)
+		idx = idx+1
+	})
+	res.status(200).send(output);
 });
 
 router.post('/sendresult', async function(req,res,next){
