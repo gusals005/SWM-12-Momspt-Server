@@ -13,7 +13,7 @@ router.get('/getdaycomment', async function(req, res, next) {
 	}
 	var d_day = (new Date() - user.baby_birthday)/(1000*3600*24);
 	d_day = Math.floor(d_day);
-	
+		
 	const user_comment = getComment(d_day);
 
 	const day_comment = {
@@ -34,16 +34,18 @@ function getComment(d_day){
 	};
 
 	var user_comment = null;
+	console.log(d_day)
 	if(d_day >=101)
 		user_comment = comments.step5;
-	else if(d_day>=51)
+	else if(d_day>=51)	
 		user_comment = comments.step4;
 	else if(d_day>=31)
-		user_commnet = comments.step3;
+		user_comment = comments.step3;
 	else if(d_day>=8)
 		user_comment = comments.step2;
 	else
 		user_comment = comments.step1;
+	
 
 	return user_comment;
 }

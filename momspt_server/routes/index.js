@@ -2,20 +2,18 @@ var express = require('express');
 var router = express.Router();
 var fs = require('fs');
 var db = require("../database/models");
-var user = db.user;
+var User = db.user;
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-	console.log(db); 
-	user.findAll()
-		.then((data)=> {
-				res.send(data);
-				})
+router.get('/', async function(req, res, next) {
+	//console.log(db); 
+	const users = await User.findAll({})
 		.catch((err)=>{
 				res.send(err.message);
 				});
-		
-	//res.render('index', { title: 'Express' });
+	console.log(users);
+	res.send({"good":"hi"});		
+//	res.render('index', { title: 'Express' });
 });
 
 /* input video json to mongodb */
