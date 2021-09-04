@@ -10,15 +10,35 @@ exports.test = async (req, res) => {
 }
 
 exports.signup = async (req,res) => {
-	const { nickname } = req.body;
+	const { nickname, babyDue, weightBeforePragnancy, weightNow, heightNow } = req.body;
 
-	const user  = await User.findOne({where:{name:nickname}});
+	const user  = await User.findOne({where:{nickname:nickname}});
 	
 	if( user == null){
-		res.status(500).json({err_massage:req.query.name + " does not exist."});
+		//User.destroy({ truncate: true, restartIdentity: true });
+		var newUser = await User.create({nickname:nickname,babyDue:babyDue, weightBeforePragnancy:weightBeforePragnancy, weightNow:weightNow, heightNow:heightNow});
+		console.log('[log]NEW USER' + 'id : ' + newUser.id + ', nickname : ' + newUser.nickname);
+	}
+	else{
+		res.status(400).json({"error": nickname+ " already exists."});
 	}
 
-	res.send(user);
+	const sendResult = {
+		"massage":"Success",
+		"user":newUser
+	}
+	res.status(201).send(sendResult);
+}
+
+exports.nicknameDuplicateCheck = async(req,res) => {
+	const { nickname } = req.body;
+	const user  = await User.findOne({where:{nickname:nickname}});
+	if (user == null){
+		res.status(200).json({"massage":"Success"});
+	}
+	else{
+		res.status(400).json({"massage":nickname+' already exists.'}); 
+	}
 }
 
 exports.login = async (req,res) => {
@@ -26,13 +46,14 @@ exports.login = async (req,res) => {
 	const secret = req.app.get('jwt-secret');
 	console.log(secret);
 
-	const user  = await User.findOne({where:{name:nickname}});
+	const user  = await User.findOne({where:{nickname:nickname}});
+
 	if( user == null){
 		res.status(500).json({err_massage:req.query.name + " does not exist."});
 	}
 
 	const token = await jwt.sign({
-		user_id: req.body.nickname
+		nickname: req.body.nickname
 	},
 	secret,
 	{

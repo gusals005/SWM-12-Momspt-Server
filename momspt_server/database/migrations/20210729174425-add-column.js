@@ -4,10 +4,10 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface
       .addColumn(
-        'exercises', // name of Target model
-        'thumbnail', // name of the key we're adding
+        'users', // name of Target model
+        'weightBeforePragnancy', // name of the key we're adding
         {
-          type: Sequelize.STRING,
+          type: Sequelize.FLOAT,
           // setting foreign key relationship
         }
       )
@@ -23,8 +23,8 @@ module.exports = {
     
 	return queryInterface
       .removeColumn(
-        'exercises', // name of the Target model
-        'thumbnail' // key we want to remove
+        'users', // name of the Target model
+        'weightBeforePragnancy' // key we want to remove
       )
 	/**
      * Add reverting commands here.

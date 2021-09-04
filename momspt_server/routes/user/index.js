@@ -7,7 +7,7 @@ router.get('/', controller.test);
 
 router.post('/signup', controller.signup);
 router.post('/login', controller.login);
-
+router.post('/nicknameduplicatecheck', controller.nicknameDuplicateCheck);
 router.use('/check', authMiddleware);
 router.get('/check', controller.check);
 
