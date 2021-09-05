@@ -5,10 +5,10 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+//var usersRouter = require('./routes/users');
 var workoutRouter = require('./routes/workout');
-var planManageRouter = require('./routes/plan-manage');
-var controllerRouter = require('./routes/user');
+//var planManageRouter = require('./routes/plan-manage');
+var userRouter = require('./routes/user');
 
 const authMiddleware = require('./middlewares/auth');
 
@@ -29,13 +29,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/controller', controllerRouter);
+app.use('/user', userRouter);
 
 app.use('/', authMiddleware)
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+//app.use('/users', usersRouter);
 app.use('/workout',workoutRouter);
-app.use('/planmanage',planManageRouter);
+//app.use('/planmanage',planManageRouter);
 
 
 // catch 404 and forward to error handler

@@ -1,15 +1,19 @@
-const express = require('express');
-const  router = express.Router();
-const db = require('../database/models');
-const User = db.user;
+var express = require('express');
+var router = express.Router();
+var fs = require('fs');
+var db = require("../../database/models");
+var User = db.user;
 
-/* GET users listing. */
-router.get('/getdaycomment', async function(req, res, next) {
-	//console.log(req.query);
+exports.test = async (req, res) => {
+	res.send({"user-infomation.js":"test"});
+}
+
+exports.getDayComment = async (req, res) => {
+    //console.log(req.query);
 	const user  = await User.findOne({where:{name:req.query.name}})
 	//console.log(user);
 	if( user == null){
-		res.status(500).json({err_massage:req.query.name + " does not exist."});
+		res.status(400).json({err_massage:req.query.name + " does not exist."});
 	}
 	var d_day = (new Date() - user.baby_birthday)/(1000*3600*24);
 	d_day = Math.floor(d_day);
@@ -21,7 +25,7 @@ router.get('/getdaycomment', async function(req, res, next) {
 		comment:user_comment
 	}
 	res.status(200).json(day_comment);
-});
+}
 
 function getComment(d_day){
 	
@@ -49,5 +53,3 @@ function getComment(d_day){
 
 	return user_comment;
 }
-
-module.exports = router;
