@@ -6,7 +6,8 @@ module.exports = (sequelize, DataTypes) => {
 		workout_set_id : DataTypes.INTEGER,
 		workout_id : DataTypes.INTEGER,
 		isfinish: DataTypes.BOOLEAN,
-		pause_time : DataTypes.INTEGER
+		pause_time : DataTypes.INTEGER,
+		score: DataTypes.STRING
 	}, {});
 	history_workout.associate = function(models){
 		history_workout.belongsTo(models.user, {

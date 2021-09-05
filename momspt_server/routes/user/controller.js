@@ -41,6 +41,23 @@ exports.nicknameDuplicateCheck = async(req,res) => {
 	}
 }
 
+
+exports.bodyTypeGlb = async (req, res) => {
+	// request 는 video
+
+	// response는 glb file 주소
+}
+
+exports.bodyTypeAnalysis = async (req, res) => {
+	//response
+	const sendResult = {
+		"bodyType":"Analysis1",
+		"workoutComment":"Analysis2"
+	};
+	res.status(200).send(sendResult);
+}
+
+
 exports.login = async (req,res) => {
 	const { nickname } = req.body;
 	const secret = req.app.get('jwt-secret');
@@ -62,13 +79,5 @@ exports.login = async (req,res) => {
 	});
 	const result = {token, user};
 	res.send(result);
-}
-
-exports.check = async (req, res) => {
-	// read the token from header or url 
-	res.status(200).json({
-        success: true,
-        message: req.decoded
-	})
 }
 

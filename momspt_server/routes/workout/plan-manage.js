@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var db = require("../database/models");
+var db = require("../../database/models");
 var User = db.user;
 var Body_type = db.body_type;
 var H_body_type = db.history_body_type;
