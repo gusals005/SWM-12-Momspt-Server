@@ -28,7 +28,7 @@ exports.getTodayWorkoutList = async (req, res) => {
 					})
 				.catch((err)=>{
 						console.log(err);
-						res.status(400).send({err_massage: "invalid input"});
+						res.status(400).send({err_message: "invalid input"});
 						});
 
 	var todayHistory = await HistoryWorkout.findAll({attributes:['isfinish','pause_time', 'score'], where:{user_id:user.id, date:user.targetDay, workout_set_id:targetWorkoutSetId}})
@@ -68,7 +68,7 @@ exports.sendResult = async (req,res) => {
 	//console.log(searchTargetRows.length);
 
 	if(searchTargetRows.length != 1){
-		res.status(400).send({"massage":"invalid input."});
+		res.status(400).send({"message":"invalid input."});
 	}
 	const updateScore = await HistoryWorkout.update({score:req.body.score, isfinish:true}, {where: {user_id:userInfo.id, date:userInfo.targetDay, workout_id:req.body.workout_id}});
 	//FOR DEBUG
@@ -138,7 +138,7 @@ async function getUserDday(nickname, date){
 	const user  = await User.findOne({where:{nickname:nickname}})
 	//console.log(user);
 	if( user == null){
-		res.status(400).json({"massage":nickname + " does not exist."});
+		res.status(400).json({"message":nickname + " does not exist."});
 	}
 	//FOR DEBUG - 유저의 출산일 출력
 	//console.log("LOG : " + nickname + " 의 출산일 : " + nicknameuser.dataValues.babyDue);

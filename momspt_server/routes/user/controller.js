@@ -10,13 +10,13 @@ exports.test = async (req, res) => {
 }
 
 exports.signup = async (req,res) => {
-	const { nickname, babyDue, weightBeforePragnancy, weightNow, heightNow } = req.body;
+	const { nickname, babyDue, weightBeforePregnancy, weightNow, heightNow } = req.body;
 
 	const user  = await User.findOne({where:{nickname:nickname}});
 	
 	if( user == null){
 		//User.destroy({ truncate: true, restartIdentity: true });
-		var newUser = await User.create({nickname:nickname,babyDue:babyDue, weightBeforePragnancy:weightBeforePragnancy, weightNow:weightNow, heightNow:heightNow});
+		var newUser = await User.create({nickname:nickname,babyDue:babyDue, weightBeforePregnancy:weightBeforePregnancy, weightNow:weightNow, heightNow:heightNow});
 		console.log('[log]NEW USER' + 'id : ' + newUser.id + ', nickname : ' + newUser.nickname);
 	}
 	else{
@@ -24,7 +24,7 @@ exports.signup = async (req,res) => {
 	}
 
 	const sendResult = {
-		"massage":"Success",
+		"message":"Success",
 		"user":newUser
 	}
 	res.status(201).send(sendResult);
@@ -34,10 +34,10 @@ exports.nicknameDuplicateCheck = async(req,res) => {
 	const { nickname } = req.body;
 	const user  = await User.findOne({where:{nickname:nickname}});
 	if (user == null){
-		res.status(200).json({"massage":"Success"});
+		res.status(200).json({"message":"Success"});
 	}
 	else{
-		res.status(400).json({"massage":nickname+' already exists.'}); 
+		res.status(400).json({"message":nickname+' already exists.'}); 
 	}
 }
 
@@ -66,7 +66,7 @@ exports.login = async (req,res) => {
 	const user  = await User.findOne({where:{nickname:nickname}});
 
 	if( user == null){
-		res.status(500).json({err_massage:req.query.name + " does not exist."});
+		res.status(500).json({err_message:req.query.name + " does not exist."});
 	}
 
 	const token = await jwt.sign({
