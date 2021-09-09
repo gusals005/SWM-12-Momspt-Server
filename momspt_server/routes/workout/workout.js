@@ -1,5 +1,4 @@
 var fs = require('fs');
-const { search } = require('.');
 var db = require("../../database/models");
 var Workout = db.workout;
 var WorkoutSet = db.workout_set;

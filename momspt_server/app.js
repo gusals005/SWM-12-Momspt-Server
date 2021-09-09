@@ -9,6 +9,7 @@ var indexRouter = require('./routes/index');
 var workoutRouter = require('./routes/workout');
 //var planManageRouter = require('./routes/plan-manage');
 var userRouter = require('./routes/user');
+var dailyRouter = require('./routes/daily');
 
 const authMiddleware = require('./middlewares/auth');
 
@@ -35,6 +36,7 @@ app.use('/', authMiddleware)
 app.use('/', indexRouter);
 //app.use('/users', usersRouter);
 app.use('/workout',workoutRouter);
+app.use('/daily', dailyRouter);
 //app.use('/planmanage',planManageRouter);
 
 

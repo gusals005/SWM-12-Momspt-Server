@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   const user = sequelize.define('user', {
 	  nickname: {type: DataTypes.STRING, allowNull:false},
     babyDue: {type: DataTypes.DATE,allowNull:false},
-    weightBeforePragnancy : {type: DataTypes.FLOAT, allowNull:true},
+    weightBeforePregnancy : {type: DataTypes.FLOAT, allowNull:true},
     weightNow:{type: DataTypes.FLOAT, allowNull:true},
     heightNow:{type:DataTypes.FLOAT, allowNull:true}
   }, {});
