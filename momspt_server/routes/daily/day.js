@@ -53,7 +53,7 @@ exports.todayAnalysis = async (req, res) => {
     res.status(200).send(sendResult);
 }
 
-exports.weeklyWeightStatistics = async (req, res) => {
+exports.weeklyStatistics = async (req, res) => {
     //FOR DEBUG
 	console.log(`[LOG] weeklyWeightStatistics req.body : ${req.body.nickname}`);
 
@@ -82,20 +82,20 @@ exports.weeklyWeightStatistics = async (req, res) => {
         const dayWorkoutHistory = await HistoryWorkout.findAll({ where:{user_id:sunUserDday.id, date:i} })
                     .catch((err)=>{	console.log(err); });
 		
-        //console.log(dayWorkoutHistory);
-		dayWorkoutHistory.forEach(async (element) => {
+        console.log('[LOG] dayWorkoutHistory');
+        console.log(dayWorkoutHistory[0]);
+        for ( let element of dayWorkoutHistory){
 			if(element.isfinish){
-                console.log("!!!!!", element.workout_id);
                 const targetWorkout = await Workout.findOne({where:{id:element.workout_id}});
                 //FOR DEBUG
                 console.log(targetWorkout);
                 console.log(`[LOG] todayAnalysis - target Workout : ${targetWorkout.playtime}`);
                 dayResult.workoutTime += targetWorkout.playtime;
-                console.log("@@@@@", element.workout_id);
             }
-		});
-
+		};
+        
         dayResult.weight = dayWeightHistory.weight;
+        console.log('[LOG] dayResult');
         console.log(dayResult);
         sendResult.push(dayResult);
 	}
