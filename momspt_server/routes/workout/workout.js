@@ -6,6 +6,9 @@ var HistoryPtPlan = db.history_pt_plan;
 var User = db.user;
 var HistoryWorkout = db.history_workout;
 
+let userController = require('../user/controller');
+let getUserDday = userController.getUserDday;
+
 /* GET home page. */
 
 // 오늘의 운동 리스트 API
@@ -133,18 +136,4 @@ exports.weeklyWorkoutStatistics = async (req,res) => {
 }
 
 
-async function getUserDday(nickname, date){
-	const user  = await User.findOne({where:{nickname:nickname}})
-	//console.log(user);
-	if( user == null){
-		res.status(400).json({"message":nickname + " does not exist."});
-	}
-	//FOR DEBUG - 유저의 출산일 출력
-	//console.log("LOG : " + nickname + " 의 출산일 : " + nicknameuser.dataValues.babyDue);
-	var targetDay = (new Date(date) - user.dataValues.babyDue)/(1000*3600*24);
-	targetDay = Math.floor(targetDay);
-	
-	const userId = user.dataValues.id;
-	return { id:userId, targetDay:targetDay};
-}
 

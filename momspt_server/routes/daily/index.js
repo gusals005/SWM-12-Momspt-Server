@@ -4,6 +4,7 @@ const dailyData = require('./day');
 const monthlyData = require('./month');
 
 router.get('/day/test',dailyData.test);
-router.get('/');
+router.post('/day/todayanalysis', dailyData.todayAnalysis);
+router.post('/day/weeklyweightstatistics',dailyData.weeklyWeightStatistics);
 
 module.exports = router;
