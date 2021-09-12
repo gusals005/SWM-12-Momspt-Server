@@ -44,7 +44,23 @@ exports.nicknameDuplicateCheck = async(req,res) => {
 
 exports.bodyTypeGlb = async (req, res) => {
 	// request 는 video
+	console.log(req.query.id);
 
+    console.log(req.file);
+
+    console.log(req.file.path);
+    
+    
+    var filePath = path.join(__dirname, '../..', 'uploads' ,req.file.filename);
+    console.log(filePath);
+    fs.access(filePath, fs.constants.F_OK, (err)=>{
+         if(err) return console.log('삭제 불가능 파일');
+
+         fs.unlink(filePath, (err)=> err?
+         console.log(err) : console.log(`${filePath}를 정상적으로 삭제하였습니다.`));    
+    });
+
+    res.send("test");
 	// response는 glb file 주소
 }
 

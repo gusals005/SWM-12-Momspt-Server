@@ -10,8 +10,10 @@ var workoutRouter = require('./routes/workout');
 //var planManageRouter = require('./routes/plan-manage');
 var userRouter = require('./routes/user');
 var dailyRouter = require('./routes/daily');
+var mypageRouter = require('./routes/mypage');
 
 const authMiddleware = require('./middlewares/auth');
+
 
 var app = express();
 var port = 3000;
@@ -30,6 +32,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 app.use('/user', userRouter);
 
 app.use('/', authMiddleware)
@@ -37,6 +40,7 @@ app.use('/', indexRouter);
 //app.use('/users', usersRouter);
 app.use('/workout',workoutRouter);
 app.use('/daily', dailyRouter);
+app.use('/mypage', mypageRouter);
 //app.use('/planmanage',planManageRouter);
 
 
@@ -57,6 +61,8 @@ app.use(function(err, req, res, next) {
 });
 
 app.listen(port, () => {
+  
+
   console.log(`Server start at ${port}`);
 })
 
