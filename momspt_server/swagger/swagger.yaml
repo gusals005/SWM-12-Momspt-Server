@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  version: 0.0.1
+  title: Momspt service server API(21.09.15)
+  description: 맘스피티 어플리케이션의 API 리스트입니다.
+  license:
+    name: MIT
+    url: https://spdx.org/licenses/MIT.html
+  contact:
+    name: HyunminLee
+    email: gusals005@gmail.com
+servers:
+  - url: 'http://localhost:3000/'
+paths:
+  /user/signup:
+    post:
+      summary: 처음 유저를 생성할 때 사용되는 회원가입 API
+      tags:
+        - user
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+components:
+  parameters: null
+  schemas:
+    User:
+      type: object
+      required:
+        - _id
+        - name
+      properties:
+        _id:
+          type: number
+          description: id
+        name:
+          type: string
+          description: 유저 이름
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+  responses:
+    BadRequest:
+      description: 잘못된 요청
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            message: 잘못된 요청
+    InternalServerError:
+      description: 서버 에러
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            success: false
+            message: 서버 내부 오류
+tags:
+  - name: "user"
+    description: "User's controller"
