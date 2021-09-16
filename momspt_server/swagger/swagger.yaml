@@ -14,10 +14,22 @@ servers:
 paths:
   /user/signup:
     post:
-      summary: 처음 유저를 생성할 때 사용되는 회원가입 API
+      summary: 회원가입 API
+      description: 처음 유저를 생성할 때 사용되는 회원가입 API입니다.
       tags:
         - user
+      consumes:
+        - "application/json"
+      parameters:
+        - in: body
+          name: body
+          description: 회원가입 요청 시 request 양식
+          required: true
+          schema:
+            $ref: '#/requests/Signup'
       responses:
+        '200':
+          $ref: '#/components/responses/SuccessRequest'
         '400':
           $ref: '#/components/responses/BadRequest'
 components:
@@ -42,7 +54,23 @@ components:
           type: boolean
         message:
           type: string
+    Success:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
   responses:
+    SuccessRequest:
+      description: 올바른 요청
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Success'
+          example:
+            success: true
+            massage: 처리 완료.
     BadRequest:
       description: 잘못된 요청
       content:
@@ -62,5 +90,29 @@ components:
             success: false
             message: 서버 내부 오류
 tags:
-  - name: "user"
-    description: "User's controller"
+  - name: User
+    description: 유저의 동작과 관련된 API들 모음
+
+requests:
+  Signup:
+    type: object
+    properties:
+      nickname:
+        type: string
+        example: fitsionary
+      babyDue:
+        type: string
+        format: date
+        example: "2021-09-15"
+      weightBeforePregnancy:
+        type: number
+        format: "double"
+        example: 54.6
+      weightNow:
+        type: number
+        format: double
+        example: 58.3
+      heightNow:
+        type: number
+        format: double
+        example: 164.3

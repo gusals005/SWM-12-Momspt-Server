@@ -40,7 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 //const specs = swaggerJsdoc(options);
 app.use("/api-docs",
   swaggerUi.serve,
-  swaggerUi.setup(swaggerDocument)
+  swaggerUi.setup(swaggerDocument, {explorer: true})
 );
 
 
