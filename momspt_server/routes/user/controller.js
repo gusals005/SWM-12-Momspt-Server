@@ -10,22 +10,32 @@ exports.test = async (req, res) => {
 }
 
 exports.signup = async (req,res) => {
-	const { nickname, babyDue, weightBeforePregnancy, weightNow, heightNow } = req.body;
+	const { kakaoId, nickname, babyDue, weightBeforePregnancy, weightNow, heightNow } = req.body;
 
-	const user  = await User.findOne({where:{nickname:nickname}});
+	const user  = await User.findOne({attributes:{exclude:['id','createdAt','updatedAt']}, where:{kakaoId:kakaoId}});
 	
 	if( user == null){
 		//User.destroy({ truncate: true, restartIdentity: true });
-		var newUser = await User.create({nickname:nickname,babyDue:babyDue, weightBeforePregnancy:weightBeforePregnancy, weightNow:weightNow, heightNow:heightNow});
-		console.log('[log]NEW USER' + 'id : ' + newUser.id + ', nickname : ' + newUser.nickname);
+		var newUser = await User.create({nickname:nickname,babyDue:babyDue, weightBeforePregnancy:weightBeforePregnancy, weightNow:weightNow, heightNow:heightNow, kakaoId:kakaoId});
+		console.log('[LOG]NEW USER' + 'id : ' + newUser.id + ', nickname : ' + newUser.nickname);
 	}
 	else{
-		res.status(400).json({"error": nickname+ " already exists."});
+		res.status(400).json({
+			"success": false,
+			"message": "해당 kakaoId를 가진 유저가 존재합니다."
+		});
 	}
 
 	const sendResult = {
 		"message":"Success",
-		"user":newUser
+		"user":{
+			"nickname":newUser.nickname,
+			"babyDue":newUser.nickname,
+			"weightBeforePregnancy":newUser.weightBeforePregnancy,
+			"weightNow":newUser.weightNow,
+			"heightNow":newUser.heightNow,
+			"kakaoId":newUser.kakaoId		
+		}
 	}
 	res.status(201).send(sendResult);
 }
@@ -75,25 +85,29 @@ exports.bodyTypeAnalysis = async (req, res) => {
 
 
 exports.login = async (req,res) => {
-	const { nickname } = req.body;
+	const { kakaoId } = req.body;
 	const secret = req.app.get('jwt-secret');
 	console.log(secret);
 
-	const user  = await User.findOne({where:{nickname:nickname}});
+	const user  = await User.findOne({where:{kakaoId:kakaoId}});
 
 	if( user == null){
-		res.status(500).json({err_message:req.query.name + " does not exist."});
+		res.status(400).json({success:false, message: '해당 '+ kakaoId + ' 를 가진 사용자가 없습니다.'});
 	}
 
 	const token = await jwt.sign({
-		nickname: req.body.nickname
+		id: user.id
 	},
 	secret,
 	{
 		expiresIn: '1d',
 		subject: 'userInfo'
 	});
-	const result = {token, user};
+	const result = {
+		success:true,
+		token:token,
+		user:user
+	};
 	res.send(result);
 }
 

@@ -7,7 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     weightBeforePregnancy : {type: DataTypes.FLOAT, allowNull:true},
     weightNow:{type: DataTypes.FLOAT, allowNull:true},
     heightNow:{type:DataTypes.FLOAT, allowNull:true},
-    thumbnail:{type:DataTypes.STRING, allowNull:true}
+    thumbnail:{type:DataTypes.STRING, allowNull:true},
+    kakaoId:{type: DataTypes.INTEGER, allowNull:true}
   }, {});
   user.associate = function(models) {
     // associations can be defined here
