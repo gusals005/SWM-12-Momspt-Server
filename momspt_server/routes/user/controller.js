@@ -4,6 +4,8 @@ var fs = require('fs');
 var db = require("../../database/models");
 var jwt = require('jsonwebtoken');
 var User = db.user;
+var axios = require('axios');
+const { response } = require('express');
 
 exports.test = async (req, res) => {
 	res.send({"hi":"hi"});
@@ -40,14 +42,17 @@ exports.signup = async (req,res) => {
 	res.status(201).send(sendResult);
 }
 
-exports.nicknameDuplicateCheck = async(req,res) => {
-	const { nickname } = req.body;
+exports.nicknameDuplicateCheck = async (req,res) => {
+
+	const kakaoAuthResult = await kakaoAuthCheck(req);
+	console.log(kakaoAuthResult);
+	const { nickname } = req.query;
 	const user  = await User.findOne({where:{nickname:nickname}});
 	if (user == null){
-		res.status(200).json({"message":"Success"});
+		res.status(200).json({success:true, message:"중복된 닉네임이 없습니다."});
 	}
-	else{
-		res.status(400).json({"message":nickname+' already exists.'}); 
+	else{ 
+		res.status(400).json({success:false, message: '해당 닉네임를 가진 유저가 존재합니다.'}); 
 	}
 }
 
@@ -125,3 +130,83 @@ exports.getUserDday = async (nickname,date) => {
 	const userId = user.dataValues.id;
 	return { id:userId, targetDay:targetDay};
 }
+
+
+async function kakaoAuthCheck(req){
+	const token = req.headers['x-access-token'];
+	const kakaoAuthResult = await kakaoAuth(token);
+
+	return kakaoAuthResult;
+}
+
+async function kakaoAuth(access_token){
+	
+	let result = -1;
+
+	const kakaoAuthResult = await axios({
+		method:'post',
+		url:'https://kapi.kakao.com/v2/user/me',
+		headers:{'Authorization': `Bearer ${access_token}`, 'Content-type':'application/x-www-form-urlencoded;charset=utf-8'}
+	})
+	.then((response) => {
+		result = response.id;
+		console.log('response : ', response);
+	})
+	.catch((error) =>{
+		result = -1;
+		console.log('error : ', error);
+	});
+
+	console.log('kakao : ', kakaoAuthResult);
+	
+	return result
+} 
+
+exports.kakaoAuthCheck = kakaoAuthCheck;
+
+/**
+ * Kakao 에서 주는 것
+ * (id=1896724603, properties={nickname=박해민}, 
+ * kakaoAccount=Account(profileNeedsAgreement=null, 
+ * profileNicknameNeedsAgreement=false, 
+ * profileImageNeedsAgreement=null, 
+ * profile=Profile(nickname=박해민,
+ * 				 profileImageUrl=null,
+ * 				thumbnailImageUrl=null,
+ * 				isDefaultImage=null),
+ * emailNeedsAgreement=null,
+ * isEmailValid=null,
+ * isEmailVerified=null,
+ * email=null,
+ * ageRangeNeedsAgreement=null,
+ * ageRange=null,
+ * birthyearNeedsAgreement=null,
+ * birthyear=null,
+ * birthdayNeedsAgreement=null,
+ * birthday=null,
+ * birthdayType=null,
+ * genderNeedsAgreement=null,
+ * gender=null,
+ * ciNeedsAgreement=null,
+ * ci=null,
+ * ciAuthenticatedAt=null,
+ * legalNameNeedsAgreement=null,
+ * legalName=null,
+ * legalBirthDateNeedsAgreement=null,
+ * legalBirthDate=null,
+ * legalGenderNeedsAgreement=null,
+ * legalGender=null,
+ * phoneNumberNeedsAgreement=null,
+ * phoneNumber=null,
+ * isKoreanNeedsAgreement=null,
+ * isKorean=null),
+ * groupUserToken=null,
+ * connectedAt=Wed Sep 08 14:13:20 GMT+09:00 2021,
+ * synchedAt=null, 
+ * hasSignedUp=null)
+ *
+ * 
+ * Access-Token
+ * oYrz6zcyIVrNg_q3YefCDiN7FJvPOCh6CAkuSworDNMAAAF7yNc8mA
+ * 
+ */

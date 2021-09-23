@@ -3,6 +3,7 @@ var router = express.Router();
 var fs = require('fs');
 var db = require("../../database/models");
 var User = db.user;
+const {kakaoAuthCheck} = require('./controller');
 
 exports.test = async (req, res) => {
 	res.send({"user-infomation.js":"test"});
@@ -10,7 +11,9 @@ exports.test = async (req, res) => {
 
 exports.getDayComment = async (req, res) => {
     //console.log(req.query);
-	const user  = await User.findOne({where:{name:req.query.name}})
+	const kakaoAuthResult = await kakaoAuthCheck(req);
+
+	const user  = await User.findOne({where:{name:'fit'}});
 	//console.log(user);
 	if( user == null){
 		res.status(400).json({err_massage:req.query.name + " does not exist."});

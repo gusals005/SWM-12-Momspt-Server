@@ -44,14 +44,12 @@ app.use("/api-docs",
 );
 
 
-app.use('/user', userRouter);
-app.use('/', authMiddleware)
 app.use('/', indexRouter);
-//app.use('/users', usersRouter);
+app.use('/user', userRouter);
 app.use('/workout',workoutRouter);
 app.use('/daily', dailyRouter);
 app.use('/mypage', mypageRouter);
-//app.use('/planmanage',planManageRouter);
+
 
 
 // catch 404 and forward to error handler
