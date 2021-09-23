@@ -9,7 +9,7 @@ var {kakaoAuthCheck} = require('./user/controller');
 router.get('/', async function(req, res, next) {
 
 	const kakaoAuthResult = await kakaoAuthCheck(req);
-	console.log(kakaoAuthResult);
+	console.log('Result' + kakaoAuthResult);
 	//console.log(db); 
 	const users = await User.findAll({})
 		.catch((err)=>{

@@ -143,21 +143,19 @@ async function kakaoAuth(access_token){
 	
 	let result = -1;
 
-	const kakaoAuthResult = await axios({
+	await axios({
 		method:'post',
 		url:'https://kapi.kakao.com/v2/user/me',
 		headers:{'Authorization': `Bearer ${access_token}`, 'Content-type':'application/x-www-form-urlencoded;charset=utf-8'}
 	})
 	.then((response) => {
-		result = response.id;
+		result = response.data.id;
 		console.log('response : ', response);
 	})
 	.catch((error) =>{
 		result = -1;
 		console.log('error : ', error);
 	});
-
-	console.log('kakao : ', kakaoAuthResult);
 	
 	return result
 } 
