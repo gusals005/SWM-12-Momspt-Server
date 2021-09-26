@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  version: 0.0.1
-  title: Momspt service server API(21.09.23)
+  version: 0.0.2
+  title: Momspt service server API(21.09.26)
   description: 맘스피티 어플리케이션의 API 리스트입니다.
   license:
     name: MIT License
@@ -93,10 +93,10 @@ paths:
         '200':
           $ref: '#/components/responses/DayComment200'
         '400':
-          $ref: '#/components/responses/DayComment400'
+          $ref: '#/components/responses/BadRequest400'
         '401':
           $ref: '#/components/responses/KakaoBad401'
-  /user/todayworkoutlist:
+  /workout/todayworkoutlist:
     get:
       summary: 유저의 오늘 운동 리스트 API
       description: 오늘 해야할 운동에 대해서 제공받는 API이다.
@@ -119,7 +119,7 @@ paths:
           $ref: '#/components/responses/BadRequest400'
         '401':
           $ref: '#/components/responses/KakaoBad401'
-  /user/workoutinfo:
+  /workout/workoutinfo?workoutcode={workoutcode}:
     get:
       summary: 운동 상세정보 제공 API
       description: 운동에 대한 상세정보를 제공받는 API이다.
@@ -135,6 +135,13 @@ paths:
           schema:
             type: string
             example: oYrz6zcyIVrNg_q3YefCDiN7FJvPOCh6CAkuSworDNMAAAF7yNc8mA
+        - in: query
+          name: workoutcode
+          description: 운동의 workoutcode를 query로 전달
+          required: true
+          schema:
+            type: string
+            example: W001
       responses:
         '200':
           description: 올바른 요청입니다.
@@ -146,7 +153,7 @@ paths:
           $ref: '#/components/responses/BadRequest400'
         '401':
           $ref: '#/components/responses/KakaoBad401'
-  /user/workoutresult:
+  /workout/workoutresult:
     post:
       summary: 운동 결과 입력 API
       description: 운동이 종료된 후 운동 결과를 전송하는 API이다.
@@ -274,7 +281,7 @@ paths:
           $ref: '#/components/responses/BadRequest400'
         '401':
           $ref: '#/components/responses/KakaoBad401'
-  /daily/month/monthlystatistics?month={month}:
+  /daily/month/monthlystatistics?year={year}&month={month}:
     get:
       summary: 한 달의 운동량 API
       description: 한 달의 운동량과 기록을 제공하는 API입니다.
@@ -290,6 +297,13 @@ paths:
           schema:
             type: string
             example: oYrz6zcyIVrNg_q3YefCDiN7FJvPOCh6CAkuSworDNMAAAF7yNc8mA
+        - in: query
+          name: year
+          description: 년도에 대한 정보를 입력합니다.
+          required: true
+          schema:
+            type: number
+            example: 2021
         - in: query
           name: month
           description: 몇 번째 달을 검색할 것인지 알려주어야 동작합니다.
@@ -571,14 +585,14 @@ components:
           schema:
             $ref: '#/components/ResponseFormat/todayanalysis'
     BadRequest400:
-      description: 요청하신 정보에 해당하는 데이터가 없습니다.
+      description: 요청하신 정보와 일치하는 데이터가 없습니다.
       content:
         application/json:
           schema:
             $ref: '#/components/ResponseFormat/baseFormat'
           example:
             success: false
-            message: 요청하신 정보에 해당하는 데이터가 없습니다.        
+            message: 요청하신 정보와 일치하는 데이터가 없습니다.        
     KakaoBad401:
       description: 카카오 인증이 되어 있지 않습니다.
       content:

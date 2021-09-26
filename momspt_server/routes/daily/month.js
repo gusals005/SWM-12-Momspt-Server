@@ -8,16 +8,23 @@ var HistoryBodyType = db.history_body_type;
 var BodyType = db.body_type;
 var HistoryWeight = db.history_weight;
 
-let userController = require('../user/controller');
-let getUserDday = userController.getUserDday;
+const {kakaoAuthCheck, getUserDday, todayKTC} = require('../utils')
 
 exports.monthlyStatistics = async (req, res) => {
-    console.log(`[LOG] monthlyStatistics- req.query.month : ${req.query.month}, req.query.nickname : ${req.query.nickname}`);
+    const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
+
+	const userInfo = await getUserDday(kakaoId,todayKTC());
+    if ( userInfo.id <0){
+        res.status(400).json(DATA_NOT_MATCH);
+    }
 
     var firstDay = UTCToKST(new Date(parseInt(req.query.year), parseInt(req.query.month)-1, 1));
     var lastDay = UTCToKST(new Date(parseInt(req.query.year), parseInt(req.query.month), 0));
 
-    const user = await User.findOne({where:{nickname:req.query.nickname}});
+    const user = await User.findOne({where:{id:userInfo.id}});
     let targetDay = millisecondtoDay(firstDay - user.babyDue);
     targetDay = Math.floor(targetDay);
     console.log(targetDay);
@@ -39,7 +46,7 @@ exports.monthlyStatistics = async (req, res) => {
                 checkStep.push(convertDayToStep(i));
             }
             
-            const dayWorkoutHistory = await HistoryWorkout.findAll({ where:{user_id:1, date:i} })
+            const dayWorkoutHistory = await HistoryWorkout.findAll({ where:{user_id:user.id, date:i} })
                     .catch((err)=>{	console.log(err); });
 
             for ( let element of dayWorkoutHistory){
@@ -82,10 +89,17 @@ exports.monthlyStatistics = async (req, res) => {
 } 
 
 exports.detailStatistics = async (req,res) => {
-    console.log(req.body);
+    
+    const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
 
-    let user = await getUserDday(req.body.nickname, req.body.date);
-    console.log(user);
+	const user = await getUserDday(kakaoId,new Date(req.body.date));
+    if ( !user.id <0){
+        res.status(400).json(DATA_NOT_MATCH);
+    }
+
     let totalTime = 0;
     let totalKcal = 0;
 

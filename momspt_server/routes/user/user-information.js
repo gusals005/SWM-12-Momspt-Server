@@ -3,31 +3,33 @@ var router = express.Router();
 var fs = require('fs');
 var db = require("../../database/models");
 var User = db.user;
-const {kakaoAuthCheck} = require('./controller');
-
-exports.test = async (req, res) => {
-	res.send({"user-infomation.js":"test"});
-}
+const {kakaoAuthCheck, getUserDday, todayKTC} = require('../utils');
+const {KAKAO_AUTH_FAIL, DATA_NOT_MATCH} = require('../jsonformat');
 
 exports.getDayComment = async (req, res) => {
     //console.log(req.query);
-	const kakaoAuthResult = await kakaoAuthCheck(req);
+	const kakaoId = await kakaoAuthCheck(req);
+	
+	if(kakaoId < 0){
+		res.status(401).json(KAKAO_AUTH_FAIL);
+	}
 
-	const user  = await User.findOne({where:{name:'fit'}});
-	//console.log(user);
+	const userInfo = await getUserDday(kakaoId, todayKTC());
+	const user  = await User.findOne({where:{id:userInfo.id}});
 	if( user == null){
-		res.status(400).json({err_massage:req.query.name + " does not exist."});
+		res.status(400).json(DATA_NOT_MATCH);
 	}
-	var d_day = (new Date() - user.baby_birthday)/(1000*3600*24);
-	d_day = Math.floor(d_day);
-		
-	const user_comment = getComment(d_day);
 
-	const day_comment = {
-		d_day:d_day,
-		comment:user_comment
+	let d_day = (todayKTC() - user.babyDue)/(1000*3600*24);
+	d_day = Math.floor(d_day);
+	
+	const userComment = getComment(d_day);
+	const dayComment = {
+		success:true,
+		dayAfterBabyDue:d_day,
+		comment:userComment
 	}
-	res.status(200).json(day_comment);
+	res.status(200).json(dayComment);
 }
 
 function getComment(d_day){
