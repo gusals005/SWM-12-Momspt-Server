@@ -7,10 +7,9 @@ var User = db.user;
 var axios = require('axios');
 const { response } = require('express');
 
-exports.test = async (req, res) => {
-	res.send({"hi":"hi"});
-}
-
+/**
+ * 회원가입 API
+ */
 exports.signup = async (req,res) => {
 	const { kakaoId, nickname, babyDue, weightBeforePregnancy, weightNow, heightNow } = req.body;
 
@@ -42,10 +41,10 @@ exports.signup = async (req,res) => {
 	res.status(201).send(sendResult);
 }
 
+/**
+ * 닉네임 중복 확인 API 
+ */
 exports.nicknameDuplicateCheck = async (req,res) => {
-
-	const kakaoAuthResult = await kakaoAuthCheck(req);
-	console.log(kakaoAuthResult);
 	const { nickname } = req.query;
 	const user  = await User.findOne({where:{nickname:nickname}});
 	if (user == null){
@@ -56,39 +55,11 @@ exports.nicknameDuplicateCheck = async (req,res) => {
 	}
 }
 
-
-exports.bodyTypeGlb = async (req, res) => {
-	// request 는 video
-	console.log(req.query.id);
-
-    console.log(req.file);
-
-    console.log(req.file.path);
-    
-    
-    var filePath = path.join(__dirname, '../..', 'uploads' ,req.file.filename);
-    console.log(filePath);
-    fs.access(filePath, fs.constants.F_OK, (err)=>{
-         if(err) return console.log('삭제 불가능 파일');
-
-         fs.unlink(filePath, (err)=> err?
-         console.log(err) : console.log(`${filePath}를 정상적으로 삭제하였습니다.`));    
-    });
-
-    res.send("test");
-	// response는 glb file 주소
-}
-
-exports.bodyTypeAnalysis = async (req, res) => {
-	//response
-	const sendResult = {
-		"bodyType":"Analysis1",
-		"workoutComment":"Analysis2"
-	};
-	res.status(200).send(sendResult);
-}
-
-
+/**
+ * 로그인 API
+ * 카카오 인증만 사용할 경우, 사용하지 않을 수도 있음.
+ * 자체 로그인이 필요할 때 사용
+ */
 exports.login = async (req,res) => {
 	const { kakaoId } = req.body;
 	const secret = req.app.get('jwt-secret');
@@ -116,8 +87,12 @@ exports.login = async (req,res) => {
 	res.send(result);
 }
 
-exports.getUserDday = async (nickname,date) => {
-	const user  = await User.findOne({where:{nickname:nickname}})
+/**
+ * 유저의 임신 후 날짜에 대해서 얻는 API
+ * kakaoId와 현재 날짜로 넣기.
+ */
+exports.getUserDday = async (kakaoId,date) => {
+	const user  = await User.findOne({where:{kakaoId:kakaoId}})
 	//console.log(user);
 	if( user == null){
 		res.status(400).json({"message":nickname + " does not exist."});
@@ -129,6 +104,34 @@ exports.getUserDday = async (nickname,date) => {
 	
 	const userId = user.dataValues.id;
 	return { id:userId, targetDay:targetDay};
+}
+
+exports.bodyTypeGlb = async (req, res) => {
+	// request 는 video
+	// console.log(req.query.id);
+    // console.log(req.file);
+    // console.log(req.file.path);
+    
+    var filePath = path.join(__dirname, '../..', 'uploads' ,req.file.filename);
+    console.log(filePath);
+    fs.access(filePath, fs.constants.F_OK, (err)=>{
+         if(err) return console.log('삭제 불가능 파일');
+
+         fs.unlink(filePath, (err)=> err?
+         console.log(err) : console.log(`${filePath}를 정상적으로 삭제하였습니다.`));    
+    });
+
+    res.send("test");
+	// response는 glb file 주소
+}
+
+exports.bodyTypeAnalysis = async (req, res) => {
+	//response
+	const sendResult = {
+		"bodyType":"Analysis1",
+		"workoutComment":"Analysis2"
+	};
+	res.status(200).send(sendResult);
 }
 
 
