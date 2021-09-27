@@ -10,7 +10,10 @@ info:
     name: HyunminLee
     email: gusals005@gmail.com
 servers:
-  - url: 'http://localhost:3000/'
+  - description : '프로젝트 cloud 배포 server'
+    url: http://3.37.163.248/
+  - description : '프로젝트 로컬 버전 server'
+    url: http://localhost:3000/
 paths:
   /user/signup:
     post:

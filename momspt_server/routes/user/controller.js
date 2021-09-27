@@ -29,8 +29,8 @@ exports.signup = async (req,res) => {
 	const sendResult = {
 		"message":"Success",
 		"user":{
-			"nickname":newUser.nickname,
-			"babyDue":newUser.nickname,
+			"nickname":newUser.nickname,   
+			"babyDue":newUser.babyDue,
 			"weightBeforePregnancy":newUser.weightBeforePregnancy,
 			"weightNow":newUser.weightNow,
 			"heightNow":newUser.heightNow,
