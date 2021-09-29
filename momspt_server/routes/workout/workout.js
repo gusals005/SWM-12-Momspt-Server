@@ -1,28 +1,32 @@
-var fs = require('fs');
-var db = require("../../database/models");
-var Workout = db.workout;
-var WorkoutSet = db.workout_set;
-var HistoryPtPlan = db.history_pt_plan;
-var User = db.user;
-var HistoryWorkout = db.history_workout;
+const fs = require('fs');
+const db = require("../../database/models");
+const { DATA_NOT_MATCH } = require('../jsonformat');
+const { kakaoAuthCheck, getUserDday, todayKTC} = require('../utils');
+const Workout = db.workout;
+const HistoryWorkout = db.history_workout;
+const PtPlanData = db.pt_plan_data;
+const WorkoutType = db.workout_type;
+const WorkoutEffect = db.workout_effect;
 
-let userController = require('../user/controller');
-let getUserDday = userController.getUserDday;
 
 /* GET home page. */
 
 // 오늘의 운동 리스트 API
 exports.getTodayWorkoutList = async (req, res) => {
-	//FOR DEBUG
-	console.log("[LOG] " + "getTodayWorkoutList req.body : ",req.body);
 
-	//오늘이 출산일 이후 며칠인지 계산.
-	const user = await getUserDday(req.body.nickname, req.body.date);
-	const targetPlanData = await HistoryPtPlan.findOne({where:{user_id:user.id, date:user.targetDay}, order:[['createdAt','desc']], limit:1});
-	var targetWorkoutSetId = targetPlanData.new_workout_set_id;
-	//FOR DEBUG
-	console.log("[LOG] " + "targetWorkoutSetId : ", targetWorkoutSetId);
+	const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
 
+	const user = await getUserDday(kakaoId,todayKTC());
+    if ( !user.id <0){
+        res.status(400).json(DATA_NOT_MATCH);
+    }
+	
+	//1. 오늘 날짜의 운동들이 뭔지(workout_id list 가져오기)
+	//우선 default body type인 1의 운동들을 가져오기
+	const workoutIdList = await PtPlanData.findAll({where:{body_type_id:{}}})
 	var workoutList = await WorkoutSet.findAll({
 		include : [{model: Workout, attributes : ['name', 'workoutCode','explanation','type','calorie','playtime','effect','thumbnail', 'video']}],
 						attributes:{exclude:['id','createdAt','updatedAt']},
@@ -47,41 +51,55 @@ exports.getTodayWorkoutList = async (req, res) => {
 
 // 운동 상세 정보 얻기 API
 exports.getInfo = async (req, res) => {
+
+	const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
+
 	var workout = await Workout.findOne({ attributes: ['name', 'workoutCode' ,'explanation','type','calorie','playtime','effect', 'thumbnail', 'video'], where : {workoutCode:req.query.workoutcode}});
 	
-	//console.log(exercise);
 	if( workout == null){
-		res.status(400).json({err_massage:req.query.name + " does not exist."});
+		res.status(400).json(DATA_NOT_MATCH);
 	}
 
 	res.status(200).send(workout);
-	//res.render('index', { title: 'Express' });
 }
 
 exports.sendResult = async (req,res) => {
 	
-	//FOR DEBUG
-	console.log("[LOG] sendResult req.Body ", req.body);
+	const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
 
-	const userInfo = await getUserDday(req.body.nickname, req.body.date);
+	const user = await getUserDday(kakaoId,new Date(req.body.date));
 	
-	const searchTargetRows = await HistoryWorkout.findAll({where: {user_id:userInfo.id, date:userInfo.targetDay, workout_id:req.body.workout_id}});
+    if ( !user.id <0){
+        res.status(400).json(DATA_NOT_MATCH);
+    }
+	
+	const searchTargetRows = await HistoryWorkout.findAll({where: {user_id:user.id, date:user.targetDay, workout_id:req.body.workout_id}});
 	//FOR DEBUG
 	//console.log(searchTargetRows.length);
 
 	if(searchTargetRows.length != 1){
-		res.status(400).send({"message":"invalid input."});
+		res.status(400).send(DATA_NOT_MATCH);
 	}
-	const updateScore = await HistoryWorkout.update({score:req.body.score, isfinish:true}, {where: {user_id:userInfo.id, date:userInfo.targetDay, workout_id:req.body.workout_id}});
+	const updateScore = await HistoryWorkout.update({score:req.body.score, isfinish:true}, {where: {user_id:user.id, date:user.targetDay, workout_id:req.body.workout_id}});
 	//FOR DEBUG
 	console.log("[LOG] updateScore: ",updateScore);
 
-	
-	res.status(200).send({"message":"Success"});
+	res.status(200).send({success:true, message:'정상적으로 운동 결과를 저장했습니다.'});
 }
 
-exports.getJson = (req,res) => {
-	const resource = req.query.name;
+exports.getJson = async (req,res) => {
+	const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
+
+	const resource = req.query.workoutcode +'.json';
 	const jsonFile = fs.readFileSync('./video/'+resource,'utf8');
 	json = JSON.parse(jsonFile);
 	//FOR DEBUG
@@ -91,19 +109,22 @@ exports.getJson = (req,res) => {
 }
 
 exports.weeklyWorkoutStatistics = async (req,res) => {
-	//FOR DEBUG
-	console.log("[LOG] " + "weeklyWorkoutStatistics req.body : ",req.body);
+
+	const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
 
 	//오늘이 출산일 이후 며칠인지 계산.
 	//const user = await getUserDday(req.body.nickname, req.body.date);
-	var today = new Date(req.body.date);
+	var today = todayKTC();
 	var dayOfweek = today.getDay();
 	console.log(dayOfweek);
 
 	const sunday = new Date(today.setDate(today.getDate() - dayOfweek));
 	const saturday = new Date(today.setDate(today.getDate() + 6));
 
-	const sunUserDday = await getUserDday(req.body.nickname, sunday);
+	const sunUserDday = await getUserDday(kakaoId, sunday);
 	const satUserDday = sunUserDday.targetDay + 6;
 
 	//FOR DEBUG

@@ -1,19 +1,16 @@
-var db = require("../../database/models");
-var Workout = db.workout;
-var WorkoutSet = db.workout_set;
-var HistoryPtPlan = db.history_pt_plan;
-var User = db.user;
-var HistoryWorkout = db.history_workout;
-var HistoryBodyType = db.history_body_type;
-var BodyType = db.body_type;
-var HistoryWeight = db.history_weight;
+const db = require("../../database/models");
+const Workout = db.workout;
+const User = db.user;
+const HistoryWorkout = db.history_workout;
+const HistoryBodyType = db.history_body_type;
+const BodyType = db.body_type;
+const HistoryWeight = db.history_weight;
+const WorkoutType = db.workout_type;
+const WorkoutEffect = db.workout_effect;
 
-let userController = require('../user/controller');
-let getUserDday = userController.getUserDday;
 
-exports.test = async (req,res) =>{
-    res.send("hi");
-}
+const {kakaoAuthCheck, getUserDday, todayKTC} = require('../utils')
+
 exports.todayAnalysis = async (req, res) => {
 
     let totalTime  = 0;
@@ -21,9 +18,16 @@ exports.todayAnalysis = async (req, res) => {
     let weightNow = 0;
     let bodyType = "";
 
-    //FOR DEBUG
-    console.log(`[LOG] todayAnalysis body : ${req.body}`);
-    const user = await getUserDday(req.body.nickname, req.body.date);
+    const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
+
+	const user = await getUserDday(kakaoId,todayKTC());
+    if ( !user.id <0){
+        res.status(400).json(DATA_NOT_MATCH);
+    }
+
     const todayWorkoutList = await HistoryWorkout.findAll({where:{user_id:user.id,date:user.targetDay}});
 
     todayWorkoutList.forEach( async (element)=>{
@@ -38,7 +42,7 @@ exports.todayAnalysis = async (req, res) => {
         }
     });
 
-    const userInfo = await User.findOne({where:{nickname:req.body.nickname}});
+    const userInfo = await User.findOne({where:{id:user.id}});
     weightNow = userInfo.weightNow;
 
     const currentBodyType = await HistoryBodyType.findAll({where:{user_id:user.id}, order: [['createdAt', 'desc']], limit : 1})
@@ -54,19 +58,22 @@ exports.todayAnalysis = async (req, res) => {
 }
 
 exports.weeklyStatistics = async (req, res) => {
-    //FOR DEBUG
-	console.log(`[LOG] weeklyWeightStatistics req.body : ${req.body.nickname}`);
+
+    const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
 
 	//오늘이 출산일 이후 며칠인지 계산.
 	//const user = await getUserDday(req.body.nickname, req.body.date);
-	var today = new Date(req.body.date);
+	var today = todayKTC();
 	var dayOfweek = today.getDay();
 	console.log(dayOfweek);
 
 	const sunday = new Date(today.setDate(today.getDate() - dayOfweek));
 	const saturday = new Date(today.setDate(today.getDate() + 6));
 
-	const sunUserDday = await getUserDday(req.body.nickname, sunday);
+	const sunUserDday = await getUserDday(kakaoId, sunday);
 	const satUserDday = sunUserDday.targetDay + 6;
 
     var sendResult = [];

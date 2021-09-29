@@ -4,29 +4,34 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 require('dotenv').config({path:__dirname+ '../..'+'.env'});
 
-var db = require("../../database/models");
-var Workout = db.workout;
-var WorkoutSet = db.workout_set;
-var HistoryPtPlan = db.history_pt_plan;
-var User = db.user;
-var HistoryWorkout = db.history_workout;
-var HistoryBodyType = db.history_body_type;
-var BodyType = db.body_type;
-var HistoryWeight = db.history_weight;
+const db = require("../../database/models");
+const Workout = db.workout;
+const User = db.user;
+const HistoryWorkout = db.history_workout;
+const HistoryBodyType = db.history_body_type;
+const BodyType = db.body_type;
+const HistoryWeight = db.history_weight;
+const WorkoutType = db.workout_type;
+const WorkoutEffect = db.workout_effect;
 
-
-let userController = require('../user/controller');
-let getUserDday = userController.getUserDday;
-
-
-
+const {kakaoAuthCheck, getUserDday, todayKTC} = require('../utils');
+const { KAKAO_AUTH_FAIL, DATA_NOT_MATCH } = require('../jsonformat');
 
 exports.mypageInfomation = async (req,res) =>{
     
-    //user table에 babyName하고 Thumbnail이 들어가야 함. 
-    const user = await User.findOne({where:{id:req.query.id}});
-    const today = Date.now();
-    let dayAfterBabyDue = millisecondtoDay(Date.now() - user.babyDue);
+    let kakaoId = await kakaoAuthCheck(req);
+
+    if(kakaoId < 0){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
+    
+    const userInfo = await getUserDday(kakaoId,todayKTC());
+    const user = await User.findOne({where:{id:userInfo.id}});
+    if( user == null){
+		res.status(400).json(DATA_NOT_MATCH);
+	}
+
+    let dayAfterBabyDue = millisecondtoDay(todayKTC() - user.babyDue);
     dayAfterBabyDue = Math.floor(dayAfterBabyDue);
 
     const sendResult =  {
@@ -41,6 +46,16 @@ exports.mypageInfomation = async (req,res) =>{
 
 exports.setProfile = async (req,res)=> {
 
+    const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
+
+    const userInfo = await getUserDday(kakaoId,todayKTC());
+    if ( !userInfo.id <0){
+        res.status(400).json(DATA_NOT_MATCH);
+    }
+    
     const prefix = 'http://d29r6pfiojlanv.cloudfront.net/profile/';
     const s3 = new AWS.S3({
         accessKeyId:process.env.AWS_ACCESS_KEY,
@@ -49,17 +64,16 @@ exports.setProfile = async (req,res)=> {
     });
 
     // request 는 video
-	console.log(req.body.id);
-
+	// console.log(req.body.id);
     console.log(req.file);
-    console.log(req.file.path);
+    // console.log(req.file.path);
     
-    var filePath = path.join(__dirname, '../..', 'uploads' ,req.file.filename);
-    console.log(filePath);
+    let filePath = path.join(__dirname, '../..', 'uploads' ,req.file.filename);
+    // console.log(filePath);
 
-    var param = {
+    let param = {
         'Bucket':'momsptbucket',
-        'Key':'profile/' + req.file.originalname,
+        'Key':'profile/' + req.file.filename + '.png',
         'ACL':'public-read',
         'Body':fs.createReadStream(filePath),
         'ContentType':'image/png'
@@ -78,18 +92,14 @@ exports.setProfile = async (req,res)=> {
 
         fs.unlink(filePath, (err)=> err?
         console.log(err) : console.log(`${filePath}를 정상적으로 삭제하였습니다.`));    
-   });
-   
-    res.status(201).send({profile:prefix+req.file.originalname});
-}
+    });
 
-function UTCToKST(date){
-    var koreaDate = date.getTime() -1*date.getTimezoneOffset()*60*1000;
-    date.setTime(koreaDate);
-    return date;
-  }
+
+    await User.update({thumbnail:prefix+req.file.filename}, {where: {id:userInfo.id}});
+    res.status(201).send({profile:prefix+req.file.filename+'.png'});
+}
   
-  function millisecondtoDay(milli){
+function millisecondtoDay(milli){
     return milli/(1000*3600*24);
-  }
+}
   

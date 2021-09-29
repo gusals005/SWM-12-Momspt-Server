@@ -4,6 +4,11 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+const swaggerUi = require('swagger-ui-express');
+var YAML = require('yamljs');
+var swaggerDocument = YAML.load('./swagger/swagger.yaml');
+
+
 var indexRouter = require('./routes/index');
 //var usersRouter = require('./routes/users');
 var workoutRouter = require('./routes/workout');
@@ -32,16 +37,19 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//const specs = swaggerJsdoc(options);
+app.use("/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, {explorer: true})
+);
 
-app.use('/user', userRouter);
 
-app.use('/', authMiddleware)
 app.use('/', indexRouter);
-//app.use('/users', usersRouter);
+app.use('/user', userRouter);
 app.use('/workout',workoutRouter);
 app.use('/daily', dailyRouter);
 app.use('/mypage', mypageRouter);
-//app.use('/planmanage',planManageRouter);
+
 
 
 // catch 404 and forward to error handler
@@ -61,8 +69,6 @@ app.use(function(err, req, res, next) {
 });
 
 app.listen(port, () => {
-  
-
   console.log(`Server start at ${port}`);
 })
 
