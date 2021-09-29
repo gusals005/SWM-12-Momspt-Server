@@ -6,13 +6,13 @@ require('dotenv').config({path:__dirname+ '../..'+'.env'});
 
 const db = require("../../database/models");
 const Workout = db.workout;
-const WorkoutSet = db.workout_set;
-const HistoryPtPlan = db.history_pt_plan;
 const User = db.user;
 const HistoryWorkout = db.history_workout;
 const HistoryBodyType = db.history_body_type;
 const BodyType = db.body_type;
 const HistoryWeight = db.history_weight;
+const WorkoutType = db.workout_type;
+const WorkoutEffect = db.workout_effect;
 
 const {kakaoAuthCheck, getUserDday, todayKTC} = require('../utils');
 const { KAKAO_AUTH_FAIL, DATA_NOT_MATCH } = require('../jsonformat');

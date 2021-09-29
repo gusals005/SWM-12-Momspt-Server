@@ -1,12 +1,13 @@
-var db = require("../../database/models");
-var Workout = db.workout;
-var WorkoutSet = db.workout_set;
-var HistoryPtPlan = db.history_pt_plan;
-var User = db.user;
-var HistoryWorkout = db.history_workout;
-var HistoryBodyType = db.history_body_type;
-var BodyType = db.body_type;
-var HistoryWeight = db.history_weight;
+const db = require("../../database/models");
+const Workout = db.workout;
+const User = db.user;
+const HistoryWorkout = db.history_workout;
+const HistoryBodyType = db.history_body_type;
+const BodyType = db.body_type;
+const HistoryWeight = db.history_weight;
+const WorkoutType = db.workout_type;
+const WorkoutEffect = db.workout_effect;
+
 
 const {kakaoAuthCheck, getUserDday, todayKTC} = require('../utils')
 

@@ -1,12 +1,12 @@
-var fs = require('fs');
-var db = require("../../database/models");
+const fs = require('fs');
+const db = require("../../database/models");
 const { DATA_NOT_MATCH } = require('../jsonformat');
 const { kakaoAuthCheck, getUserDday, todayKTC} = require('../utils');
-var Workout = db.workout;
-var WorkoutSet = db.workout_set;
-var HistoryPtPlan = db.history_pt_plan;
-var User = db.user;
-var HistoryWorkout = db.history_workout;
+const Workout = db.workout;
+const User = db.user;
+const HistoryWorkout = db.history_workout;
+const WorkoutType = db.workout_type;
+const WorkoutEffect = db.workout_effect;
 
 
 /* GET home page. */

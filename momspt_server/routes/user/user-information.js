@@ -1,6 +1,3 @@
-var express = require('express');
-var router = express.Router();
-var fs = require('fs');
 var db = require("../../database/models");
 var User = db.user;
 const {kakaoAuthCheck, getUserDday, todayKTC} = require('../utils');
@@ -55,6 +52,5 @@ function getComment(d_day){
 	else
 		user_comment = comments.step1;
 	
-
 	return user_comment;
 }
