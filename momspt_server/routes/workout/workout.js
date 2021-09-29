@@ -3,8 +3,8 @@ const db = require("../../database/models");
 const { DATA_NOT_MATCH } = require('../jsonformat');
 const { kakaoAuthCheck, getUserDday, todayKTC} = require('../utils');
 const Workout = db.workout;
-const User = db.user;
 const HistoryWorkout = db.history_workout;
+const PtPlanData = db.pt_plan_data;
 const WorkoutType = db.workout_type;
 const WorkoutEffect = db.workout_effect;
 
@@ -23,17 +23,10 @@ exports.getTodayWorkoutList = async (req, res) => {
     if ( !user.id <0){
         res.status(400).json(DATA_NOT_MATCH);
     }
-
-	const targetPlanData = await HistoryPtPlan.findOne({where:{user_id:user.id, date:user.targetDay}, order:[['createdAt','desc']], limit:1});
-
-	if(targetPlanData == null){
-		res.status(400).json(DATA_NOT_MATCH);
-	}
-
-	let targetWorkoutSetId = targetPlanData.new_workout_set_id;
-	//FOR DEBUG
-	console.log("[LOG] " + "targetWorkoutSetId : ", targetWorkoutSetId);
-
+	
+	//1. 오늘 날짜의 운동들이 뭔지(workout_id list 가져오기)
+	//우선 default body type인 1의 운동들을 가져오기
+	const workoutIdList = await PtPlanData.findAll({where:{body_type_id:{}}})
 	var workoutList = await WorkoutSet.findAll({
 		include : [{model: Workout, attributes : ['name', 'workoutCode','explanation','type','calorie','playtime','effect','thumbnail', 'video']}],
 						attributes:{exclude:['id','createdAt','updatedAt']},
