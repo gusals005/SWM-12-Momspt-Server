@@ -1,9 +1,10 @@
 const fs = require('fs');
 const db = require("../../database/models");
 const { DATA_NOT_MATCH } = require('../jsonformat');
-const { kakaoAuthCheck, getUserDday, todayKTC} = require('../utils');
+const { kakaoAuthCheck, getUserDday, todayKTC, findBodyType, DEFAULT_BODY_TYPE} = require('../utils');
 const Workout = db.workout;
 const HistoryWorkout = db.history_workout;
+const HistoryBodyType = db.history_body_type;
 const PtPlanData = db.pt_plan_data;
 const WorkoutType = db.workout_type;
 const WorkoutEffect = db.workout_effect;
@@ -24,9 +25,41 @@ exports.getTodayWorkoutList = async (req, res) => {
         res.status(400).json(DATA_NOT_MATCH);
     }
 	
-	//1. 오늘 날짜의 운동들이 뭔지(workout_id list 가져오기)
-	//우선 default body type인 1의 운동들을 가져오기
-	const workoutIdList = await PtPlanData.findAll({where:{body_type_id:{}}})
+	let bodyTypeList = [];
+	let workoutIdList = [];
+	const nowBodyType = await findBodyType(user.id, todayKTC());
+	for(let bodyType of nowBodyType){
+		bodyTypeList.push(bodyType.body_type_id);
+		if(bodyType.body_type_id == 1)
+			break;
+	}
+
+	bodyTypeList.sort((a,b)=>{
+		if(a>=b) return 1;
+		else return -1;
+	})
+
+	console.log(bodyTypeList);
+	
+	for(let bodyTypeId of bodyTypeList){
+		let workoutList = await PtPlanData.findAll({where:{body_type_id:bodyTypeId, workout_date: user.targetDay}});
+		for(let workout of workoutList){
+			workoutIdList.push(workout.workout_id);
+		}
+	}
+	console.log(workoutIdList);
+	/**
+	if(nowBodyType[0].body_type_id != DEFAULT_BODY_TYPE){
+		workoutList = await PtPlanData.findAll({where:{body_type_id:nowBodyType[0].body_type_id, workout_date: user.targetDay}});
+		for(let workout of workoutList){
+			workoutIdList.push(workout.workout_id);
+		}
+	}
+	
+	
+	console.log(workoutIdList);
+	*/
+	/**
 	var workoutList = await WorkoutSet.findAll({
 		include : [{model: Workout, attributes : ['name', 'workoutCode','explanation','type','calorie','playtime','effect','thumbnail', 'video']}],
 						attributes:{exclude:['id','createdAt','updatedAt']},
@@ -46,6 +79,8 @@ exports.getTodayWorkoutList = async (req, res) => {
 		output.push(element)
 		idx = idx+1
 	})
+	*/
+	let output = [];
 	res.status(200).send(output);
 }
 

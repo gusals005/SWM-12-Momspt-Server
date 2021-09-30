@@ -1,6 +1,10 @@
 const axios = require('axios');
 const db = require("../database/models");
 const User = db.user;
+const HistoryBodyType = db.history_body_type;
+const {Op} = require('sequelize');
+
+const DEFAULT_BODY_TYPE = 1;
 
 async function kakaoAuthCheck(req){
 	const token = req.headers['x-access-token'];
@@ -62,8 +66,31 @@ function todayKTC(){
 	return todayMidnight;
 }
 
+async function findBodyType(userId, date){
+	
+	const bodyType = await HistoryBodyType.findAll({
+													where:{
+														user_id:userId,
+														createdAt: {
+															[Op.lte]: date
+														}},
+													order:[
+														['createdAt','desc'],
+														['body_type_id', 'desc']
+													],
+												})
+												.catch((err) =>{
+													console.log("[LOG][ERROR]findBodyType function error");
+													console.log(err);
+												})
+	
+	return bodyType;
+}
+
 module.exports = {
     kakaoAuthCheck,
     getUserDday,
-    todayKTC
+    todayKTC,
+	findBodyType,
+	DEFAULT_BODY_TYPE
 }
