@@ -8,6 +8,7 @@ const HistoryBodyType = db.history_body_type;
 const PtPlanData = db.pt_plan_data;
 const WorkoutType = db.workout_type;
 const WorkoutEffect = db.workout_effect;
+const Video = db.video;
 
 
 /* GET home page. */
@@ -27,6 +28,7 @@ exports.getTodayWorkoutList = async (req, res) => {
 	
 	let bodyTypeList = [];
 	let workoutIdList = [];
+	let result = [];
 	const nowBodyType = await findBodyType(user.id, todayKTC());
 	for(let bodyType of nowBodyType){
 		bodyTypeList.push(bodyType.body_type_id);
@@ -37,51 +39,35 @@ exports.getTodayWorkoutList = async (req, res) => {
 	bodyTypeList.sort((a,b)=>{
 		if(a>=b) return 1;
 		else return -1;
-	})
+	});
 
-	console.log(bodyTypeList);
-	
 	for(let bodyTypeId of bodyTypeList){
 		let workoutList = await PtPlanData.findAll({where:{body_type_id:bodyTypeId, workout_date: user.targetDay}});
 		for(let workout of workoutList){
 			workoutIdList.push(workout.workout_id);
 		}
 	}
-	console.log(workoutIdList);
-	/**
-	if(nowBodyType[0].body_type_id != DEFAULT_BODY_TYPE){
-		workoutList = await PtPlanData.findAll({where:{body_type_id:nowBodyType[0].body_type_id, workout_date: user.targetDay}});
-		for(let workout of workoutList){
-			workoutIdList.push(workout.workout_id);
+	
+	for(let workoutId of workoutIdList){
+		let nowWorkout = await Workout.findOne({where:{id:workoutId}});
+		let videoInfoList = await Video.findAll({where:{videoCode:nowWorkout.videoCode}});
+		let videoCheckTime = [];
+		for ( let video of videoInfoList){
+			videoCheckTime.push({workoutStartTime:video.workoutStartTime, workoutFinishTime:video.workoutFinishTime});
 		}
+		nowWorkout.dataValues.video = videoInfoList[0].url;
+		nowWorkout.dataValues.videoCheckTime = videoCheckTime;
+
+		let workoutHistory = await HistoryWorkout.findOne({ attributes:['score', 'pause_time'], where:{user_id:user.id, date:user.targetDay, workout_id:workoutId}});
+
+		nowWorkout.dataValues.history = workoutHistory;
+
+		result.push(nowWorkout);
 	}
-	
-	
-	console.log(workoutIdList);
-	*/
-	/**
-	var workoutList = await WorkoutSet.findAll({
-		include : [{model: Workout, attributes : ['name', 'workoutCode','explanation','type','calorie','playtime','effect','thumbnail', 'video']}],
-						attributes:{exclude:['id','createdAt','updatedAt']},
-						where:{set_id:targetWorkoutSetId}
-					})
-				.catch((err)=>{
-						console.log(err);
-						res.status(400).send({err_message: "invalid input"});
-						});
 
-	var todayHistory = await HistoryWorkout.findAll({attributes:['isfinish','pause_time', 'score'], where:{user_id:user.id, date:user.targetDay, workout_set_id:targetWorkoutSetId}})
 
-	var output = []
-	var idx = 0
-	workoutList.forEach((element) => {
-		element.dataValues['history']=todayHistory[idx]
-		output.push(element)
-		idx = idx+1
-	})
-	*/
-	let output = [];
-	res.status(200).send(output);
+	res.status(200).json(result);
+
 }
 
 // 운동 상세 정보 얻기 API
