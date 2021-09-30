@@ -153,7 +153,6 @@ exports.weeklyWorkoutStatistics = async (req,res) => {
 	console.log("[LOG] weeklyResult : ", sendResult);
 	
 	res.status(200).send(sendResult);
-
 }
 
 
