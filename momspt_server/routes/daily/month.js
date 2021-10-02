@@ -7,8 +7,9 @@ const BodyType = db.body_type;
 const HistoryWeight = db.history_weight;
 const WorkoutType = db.workout_type;
 const WorkoutEffect = db.workout_effect;
-
-const {kakaoAuthCheck, getUserDday, todayKTC} = require('../utils')
+const PtPlanData = db.pt_plan_data;
+const {kakaoAuthCheck, getUserDday, todayKTC, findBodyType} = require('../utils');
+const {getWorkoutList} = require('../workout/workout');
 
 exports.monthlyStatistics = async (req, res) => {
     const kakaoId = await kakaoAuthCheck(req);
@@ -16,51 +17,56 @@ exports.monthlyStatistics = async (req, res) => {
         res.status(401).json(KAKAO_AUTH_FAIL);
     }
 
-	const userInfo = await getUserDday(kakaoId,todayKTC());
-    if ( userInfo.id <0){
-        res.status(400).json(DATA_NOT_MATCH);
-    }
+    let firstDate = UTCToKST(new Date(parseInt(req.query.year), parseInt(req.query.month)-1, 1));
+    let lastDate = UTCToKST(new Date(parseInt(req.query.year), parseInt(req.query.month), 0));
+    let today = todayKTC();
 
-    var firstDay = UTCToKST(new Date(parseInt(req.query.year), parseInt(req.query.month)-1, 1));
-    var lastDay = UTCToKST(new Date(parseInt(req.query.year), parseInt(req.query.month), 0));
-
-    const user = await User.findOne({where:{id:userInfo.id}});
-    let targetDay = millisecondtoDay(firstDay - user.babyDue);
-    targetDay = Math.floor(targetDay);
-    console.log(targetDay);
+    const userInfoFirstDay = await getUserDday(kakaoId, firstDate);
+    let startDay = userInfoFirstDay.targetDay;
+    let lastDay = startDay + millisecondtoDay(lastDate - firstDate) +1;
 
     let sendResult = [];
-    let idx = 1;
+    
     let totalDoneWorkoutTime = 0;
-    let totalFinishedDay =0;
+    let completeDayCount =0;
     let checkStep = [];
-    for( var i = targetDay; i<=targetDay + millisecondtoDay(lastDay-firstDay)+1 ; i++){
+    for( let i = startDay, idx = 1; i <= lastDay ; i++, idx++){
         let dayResult = {};
-        let completeCheck = 0;
+        let completeWorkoutCheck = 0;
         let totalCheck =0;
         dayResult.day = idx++;
 
-        if(i >0){
+        if(i>0){
             if(!checkStep.includes(convertDayToStep(i)))
             {
                 checkStep.push(convertDayToStep(i));
             }
+            //execute all workout count of day
+            let workoutIdList = [];
+            let nowDate = new Date(today.setDate(today.getDate() + idx - 1));
+            const bodyTypeIdList = await findBodyType(userInfoFirstDay.id, nowDate);
+        
+            for(let bodyTypeId of bodyTypeIdList){
+                let workoutList = await PtPlanData.findAll({where:{body_type_id:bodyTypeId, workout_date: i}});
+                for(let workout of workoutList){
+                    workoutIdList.push(workout.workout_id);
+                }
+            }
             
-            const dayWorkoutHistory = await HistoryWorkout.findAll({ where:{user_id:user.id, date:i} })
+            totalCheck = workoutIdList.length;
+
+            //to find complete workout
+            const dayWorkoutHistory = await HistoryWorkout.findAll({ where:{user_id:userInfoFirstDay.id, date:i} })
                     .catch((err)=>{	console.log(err); });
 
             for ( let element of dayWorkoutHistory){
-                if(element.isfinish){
-                    completeCheck++;
-                    const targetWorkout = await Workout.findOne({where:{id:element.workout_id}});
-
-                    totalDoneWorkoutTime += targetWorkout.playtime;
-                }
-                totalCheck++;
+                completeWorkoutCheck++;
+                const targetWorkout = await Workout.findOne({where:{id:element.workout_id}});
+                totalDoneWorkoutTime += targetWorkout.playtime;
             }
 
-            if(totalCheck ==completeCheck && totalCheck != 0){ dayResult.status = "COMPLETE"; totalFinishedDay++; }
-            else if(completeCheck != 0){ dayResult.status = "SOME"; }
+            if(totalCheck ==completeWorkoutCheck && totalCheck != 0){ dayResult.status = "COMPLETE"; completeDayCount++; }
+            else if(completeWorkoutCheck != 0){ dayResult.status = "SOME"; }
             else{ dayResult.status = "NONE"; }
         }
         else{
@@ -68,6 +74,7 @@ exports.monthlyStatistics = async (req, res) => {
         }
         sendResult.push(dayResult);
     }
+
 
     let responseStep = "";
     for( let i in checkStep){
@@ -79,8 +86,10 @@ exports.monthlyStatistics = async (req, res) => {
         }
     }
     console.log(responseStep)
+
+
     let response = {
-        count:totalFinishedDay,
+        count:completeDayCount,
         time:totalDoneWorkoutTime,
         step:responseStep,
         monthlyStatistics:sendResult
@@ -95,64 +104,24 @@ exports.detailStatistics = async (req,res) => {
         res.status(401).json(KAKAO_AUTH_FAIL);
     }
 
-	const user = await getUserDday(kakaoId,new Date(req.body.date));
-    if ( !user.id <0){
-        res.status(400).json(DATA_NOT_MATCH);
-    }
-
     let totalTime = 0;
     let totalKcal = 0;
+    let workoutList = await getWorkoutList(kakaoId, new Date(req.body.date));
 
-    const dayWorkoutHistory = await HistoryWorkout.findAll({ where:{user_id:user.id, date:user.targetDay} })
-                    .catch((err)=>{	console.log(err); });
-		
-    console.log('[LOG] dayWorkoutHistory');
-    
-    for ( let element of dayWorkoutHistory){
-        if(element.isfinish){
-            const targetWorkout = await Workout.findOne({where:{id:element.workout_id}});
-            //FOR DEBUG
-            console.log(targetWorkout);
-            console.log(`[LOG] todayAnalysis - target Workout : ${targetWorkout.playtime}`);
-            totalTime += targetWorkout.playtime;
-            totalKcal += targetWorkout.calorie;
+    for( let workout of workoutList){
+        if(workout.dataValues.history != null){
+            totalTime += workout.playtime;
+            totalKcal += workout.calorie;
         }
     }
-
-    const targetPlanData = await HistoryPtPlan.findOne({where:{user_id:user.id, date:user.targetDay}, order:[['createdAt','desc']], limit:1});
-	var targetWorkoutSetId = targetPlanData.new_workout_set_id;
-	//FOR DEBUG
-	console.log("[LOG] " + "targetWorkoutSetId : ", targetWorkoutSetId);
-
-	var workoutList = await WorkoutSet.findAll({
-		include : [{model: Workout, attributes : ['name', 'workoutCode','explanation','type','calorie','playtime','effect','thumbnail', 'video']}],
-						attributes:{exclude:['id','createdAt','updatedAt']},
-						where:{set_id:targetWorkoutSetId}
-					})
-				.catch((err)=>{
-						console.log(err);
-						res.status(400).send({err_message: "invalid input"});
-						});
-
-	var todayHistory = await HistoryWorkout.findAll({attributes:['isfinish','pause_time', 'score'], where:{user_id:user.id, date:user.targetDay, workout_set_id:targetWorkoutSetId}})
-
-	var output = []
-	var idx = 0
-    console.log(todayHistory);
-    for ( let element of workoutList){
-		element.dataValues.history=todayHistory[idx]
-		output.push(element)
-		idx = idx+1
-	}
 
     let response = {
         time:totalTime,
         kcal:totalKcal,
-        workout:output
+        workout:workoutList
     }
 
     res.status(200).send(response);
-
 }
 
 function UTCToKST(date){

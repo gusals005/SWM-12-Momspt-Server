@@ -1,7 +1,8 @@
-var fs = require('fs');
-var db = require("../../database/models");
-var jwt = require('jsonwebtoken');
-var User = db.user;
+const fs = require('fs');
+const db = require("../../database/models");
+const jwt = require('jsonwebtoken');
+const Sequelize = require('sequelize');
+const User = db.user;
 
 
 /**
@@ -14,8 +15,23 @@ exports.signup = async (req,res) => {
 	
 	if( user == null){
 		//User.destroy({ truncate: true, restartIdentity: true });
-		var newUser = await User.create({nickname:nickname,babyDue:babyDue, weightBeforePregnancy:weightBeforePregnancy, weightNow:weightNow, heightNow:heightNow, kakaoId:kakaoId});
+		let maxId = await User.findOne({ attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']] });
+
+		let newUser = await User.create({id:maxId.id+1, nickname:nickname,babyDue:babyDue, weightBeforePregnancy:weightBeforePregnancy, weightNow:weightNow, heightNow:heightNow, kakaoId:kakaoId});
 		console.log('[LOG]NEW USER' + 'id : ' + newUser.id + ', nickname : ' + newUser.nickname);
+
+		const sendResult = {
+			"message":"Success",
+			"user":{
+				"nickname":newUser.nickname,   
+				"babyDue":newUser.babyDue,
+				"weightBeforePregnancy":newUser.weightBeforePregnancy,
+				"weightNow":newUser.weightNow,
+				"heightNow":newUser.heightNow,
+				"kakaoId":newUser.kakaoId		
+			}
+		}
+		res.status(201).send(sendResult);
 	}
 	else{
 		res.status(400).json({
@@ -23,19 +39,6 @@ exports.signup = async (req,res) => {
 			"message": "해당 kakaoId를 가진 유저가 존재합니다."
 		});
 	}
-
-	const sendResult = {
-		"message":"Success",
-		"user":{
-			"nickname":newUser.nickname,   
-			"babyDue":newUser.babyDue,
-			"weightBeforePregnancy":newUser.weightBeforePregnancy,
-			"weightNow":newUser.weightNow,
-			"heightNow":newUser.heightNow,
-			"kakaoId":newUser.kakaoId		
-		}
-	}
-	res.status(201).send(sendResult);
 }
 
 /**
@@ -47,7 +50,7 @@ exports.nicknameDuplicateCheck = async (req,res) => {
 	if (user == null){
 		res.status(200).json({success:true, message:"중복된 닉네임이 없습니다."});
 	}
-	else{ 
+	else{
 		res.status(400).json({success:false, message: '해당 닉네임를 가진 유저가 존재합니다.'}); 
 	}
 }

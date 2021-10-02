@@ -45,7 +45,7 @@ async function kakaoAuth(access_token){
 	const user  = await User.findOne({where:{kakaoId:kakaoId}})
 	
 	if( user == null){
-		return {id:-1, targetday:0};
+		return {id:-1, targetDay:0};
 	}
 	//FOR DEBUG - 유저의 출산일 출력
 	//console.log("LOG : " + nickname + " 의 출산일 : " + nicknameuser.dataValues.babyDue);
@@ -67,7 +67,8 @@ function todayKTC(){
 }
 
 async function findBodyType(userId, date){
-	
+
+	let bodyTypeList = [];
 	const bodyType = await HistoryBodyType.findAll({
 													where:{
 														user_id:userId,
@@ -84,7 +85,17 @@ async function findBodyType(userId, date){
 													console.log(err);
 												})
 	
-	return bodyType;
+	for(let type of bodyType){
+		bodyTypeList.push(type.body_type_id);
+		if(type.body_type_id == 1)
+			break;
+	}
+
+	bodyTypeList.sort((a,b)=>{
+		if(a>=b) return 1;
+		else return -1;
+	});
+	return bodyTypeList;
 }
 
 module.exports = {

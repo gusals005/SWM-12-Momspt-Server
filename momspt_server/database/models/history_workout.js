@@ -1,10 +1,14 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
 	const history_workout = sequelize.define('history_workout',{
+		id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true
+        },
 		user_id : DataTypes.INTEGER,
 		date : DataTypes.INTEGER,
 		workout_id : DataTypes.INTEGER,
-		isfinish: DataTypes.BOOLEAN,
 		pause_time : DataTypes.INTEGER,
 		score: DataTypes.STRING
 	}, {});

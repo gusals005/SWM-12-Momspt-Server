@@ -9,6 +9,7 @@ const PtPlanData = db.pt_plan_data;
 const WorkoutType = db.workout_type;
 const WorkoutEffect = db.workout_effect;
 const Video = db.video;
+const Sequelize = require('sequelize');
 
 
 /* GET home page. */
@@ -21,53 +22,8 @@ exports.getTodayWorkoutList = async (req, res) => {
         res.status(401).json(KAKAO_AUTH_FAIL);
     }
 
-	const user = await getUserDday(kakaoId,todayKTC());
-    if ( !user.id <0){
-        res.status(400).json(DATA_NOT_MATCH);
-    }
-	
-	let bodyTypeList = [];
-	let workoutIdList = [];
-	let result = [];
-	const nowBodyType = await findBodyType(user.id, todayKTC());
-	for(let bodyType of nowBodyType){
-		bodyTypeList.push(bodyType.body_type_id);
-		if(bodyType.body_type_id == 1)
-			break;
-	}
-
-	bodyTypeList.sort((a,b)=>{
-		if(a>=b) return 1;
-		else return -1;
-	});
-
-	for(let bodyTypeId of bodyTypeList){
-		let workoutList = await PtPlanData.findAll({where:{body_type_id:bodyTypeId, workout_date: user.targetDay}});
-		for(let workout of workoutList){
-			workoutIdList.push(workout.workout_id);
-		}
-	}
-	
-	for(let workoutId of workoutIdList){
-		let nowWorkout = await Workout.findOne({where:{id:workoutId}});
-		let videoInfoList = await Video.findAll({where:{videoCode:nowWorkout.videoCode}});
-		let videoCheckTime = [];
-		for ( let video of videoInfoList){
-			videoCheckTime.push({workoutStartTime:video.workoutStartTime, workoutFinishTime:video.workoutFinishTime});
-		}
-		nowWorkout.dataValues.video = videoInfoList[0].url;
-		nowWorkout.dataValues.videoCheckTime = videoCheckTime;
-
-		let workoutHistory = await HistoryWorkout.findOne({ attributes:['score', 'pause_time'], where:{user_id:user.id, date:user.targetDay, workout_id:workoutId}});
-
-		nowWorkout.dataValues.history = workoutHistory;
-
-		result.push(nowWorkout);
-	}
-
-
+	let result = await getWorkoutList(kakaoId, todayKTC());
 	res.status(200).json(result);
-
 }
 
 // 운동 상세 정보 얻기 API
@@ -78,8 +34,12 @@ exports.getInfo = async (req, res) => {
         res.status(401).json(KAKAO_AUTH_FAIL);
     }
 
-	var workout = await Workout.findOne({ attributes: ['name', 'workoutCode' ,'explanation','type','calorie','playtime','effect', 'thumbnail', 'video'], where : {workoutCode:req.query.workoutcode}});
-	
+	let workout = await Workout.findOne({ attributes: ['id','name', 'workoutCode' ,'explanation','calorie','playtime', 'thumbnail', 'videoCode'], where : {workoutCode:req.query.workoutcode}});
+	console.log(workout.dataValues);
+	workout = await mergeVideoInfo(workout);
+	workout = await mergeWorkoutType(workout);
+	workout = await mergeWorkoutEffect(workout);
+
 	if( workout == null){
 		res.status(400).json(DATA_NOT_MATCH);
 	}
@@ -104,14 +64,21 @@ exports.sendResult = async (req,res) => {
 	//FOR DEBUG
 	//console.log(searchTargetRows.length);
 
-	if(searchTargetRows.length != 1){
-		res.status(400).send(DATA_NOT_MATCH);
+	if(searchTargetRows.length == 0 ){
+		//create new record
+		let maxId = await HistoryWorkout.findOne({ attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']] });
+		const insertRecored = await HistoryWorkout.create({id:maxId.id+1, user_id:user.id, date:user.targetDay, workout_id:req.body.workout_id, pause_time:0, score:req.body.score})
+		res.status(200).send({success:true, message:'정상적으로 운동 결과를 저장했습니다.'});
 	}
-	const updateScore = await HistoryWorkout.update({score:req.body.score, isfinish:true}, {where: {user_id:user.id, date:user.targetDay, workout_id:req.body.workout_id}});
-	//FOR DEBUG
-	console.log("[LOG] updateScore: ",updateScore);
+	else{
+		//update code
+		const updateRecord = await HistoryWorkout.update({score:req.body.score}, {where: {user_id:user.id, date:user.targetDay, workout_id:req.body.workout_id}});
+		//console.log("[LOG] updateScore: ",updateScore);
 
-	res.status(200).send({success:true, message:'정상적으로 운동 결과를 저장했습니다.'});
+		res.status(200).send({success:true, message:'정상적으로 운동 결과를 저장했습니다.'});
+	}
+
+	
 }
 
 exports.getJson = async (req,res) => {
@@ -123,8 +90,6 @@ exports.getJson = async (req,res) => {
 	const resource = req.query.workoutcode +'.json';
 	const jsonFile = fs.readFileSync('./video/'+resource,'utf8');
 	json = JSON.parse(jsonFile);
-	//FOR DEBUG
-	//console.log('LOG json rows : ' + json.exercise.length);
 
 	res.status(200).send(json);
 }
@@ -137,35 +102,47 @@ exports.weeklyWorkoutStatistics = async (req,res) => {
     }
 
 	//오늘이 출산일 이후 며칠인지 계산.
-	//const user = await getUserDday(req.body.nickname, req.body.date);
-	var today = todayKTC();
-	var dayOfweek = today.getDay();
-	console.log(dayOfweek);
+	let today = todayKTC();
+	let dayOfweek = today.getDay();
 
 	const sunday = new Date(today.setDate(today.getDate() - dayOfweek));
-	const saturday = new Date(today.setDate(today.getDate() + 6));
-
-	const sunUserDday = await getUserDday(kakaoId, sunday);
-	const satUserDday = sunUserDday.targetDay + 6;
+	const userInfoSunday = await getUserDday(kakaoId, sunday);
 
 	//FOR DEBUG
 	//console.log(sunUserDday.targetDay, satUserDday);
 
-	var sendResult = [];
-	var idx=1;
-	for(var i = sunUserDday.targetDay; i<=satUserDday; i++){
-		var dayResult = {};
+	let sendResult = [];
+	let idx=1;
+	for(let i = 0; i< 7; i++){
+		let dayResult = {};
+		let total = 0;
+		let done = 0;
 		
-		dayResult.order = idx++;
-		const dayWorkoutHistory = await HistoryWorkout.findAll({ where:{user_id:sunUserDday.id, date:i} })
+		let nowDate = new Date(today.setDate(today.getDate() + i));
+		let nowTargetDay = userInfoSunday.targetDay + i;
+		
+		// total workout Number
+		let workoutIdList = [];
+
+		const bodyTypeIdList = await findBodyType(userInfoSunday.id, nowDate);
+	
+		for(let bodyTypeId of bodyTypeIdList){
+			let workoutList = await PtPlanData.findAll({where:{body_type_id:bodyTypeId, workout_date: nowTargetDay}});
+			for(let workout of workoutList){
+				workoutIdList.push(workout.workout_id);
+			}
+		}
+		
+		total = workoutIdList.length;
+		//console.log('total', total);
+
+		// done workout number
+		const dayWorkoutHistory = await HistoryWorkout.findAll({ where:{user_id:userInfoSunday.id, date:nowTargetDay} })
 										.catch((err)=>{	console.log(err); });
 		
-		var done = 0, total =0;
-		dayWorkoutHistory.forEach((element) => {
-			if(element.isfinish)
-				done++;
-			total++;
-		});
+		done = dayWorkoutHistory.length;
+
+		dayResult.order = idx++;
 		dayResult.done = done;
 		dayResult.totalWorkout = total;
 		sendResult.push(dayResult);
@@ -177,4 +154,90 @@ exports.weeklyWorkoutStatistics = async (req,res) => {
 }
 
 
+exports.getWorkoutList = getWorkoutList;
 
+async function getWorkoutList(kakaoId, date){
+	const user = await getUserDday(kakaoId, date);
+    if ( !user.id <0){
+        res.status(400).json(DATA_NOT_MATCH);
+    }
+	
+	let workoutIdList = [];
+	let result = [];
+	const bodyTypeIdList = await findBodyType(user.id, date);
+
+	for(let bodyTypeId of bodyTypeIdList){
+		let workoutList = await PtPlanData.findAll({where:{body_type_id:bodyTypeId, workout_date: user.targetDay}});
+		for(let workout of workoutList){
+			workoutIdList.push(workout.workout_id);
+		}
+	}
+	
+	for(let workoutId of workoutIdList){
+		let nowWorkout = await Workout.findOne({where:{id:workoutId}});
+		nowWorkout = await mergeWorkoutData(nowWorkout, user.id, user.targetDay);
+		result.push(nowWorkout);
+	}
+	
+	return result;
+}
+
+async function mergeWorkoutData(workout, userId, userTargetDay){
+	workout = await mergeVideoInfo(workout);
+	workout = await mergeWorkoutType(workout);
+	workout = await mergeWorkoutEffect(workout);
+	workout = await mergeWorkoutHistory(workout, userId, userTargetDay);
+
+	return workout;
+}
+
+async function mergeVideoInfo(workout){
+
+	let videoInfoList = await Video.findAll({where:{videoCode:workout.videoCode}});
+
+	let videoCheckTime = [];
+	for ( let video of videoInfoList){
+		videoCheckTime.push({workoutStartTime:video.workoutStartTime, workoutFinishTime:video.workoutFinishTime});
+	}
+
+	workout.dataValues.video = videoInfoList[0].url
+	workout.dataValues.videoCheckTime = videoCheckTime;
+
+	return workout;
+}
+
+async function mergeWorkoutType(workout){
+	let result  = [];
+
+	let typeList = await WorkoutType.findAll({attributes:['type'], where:{workout_id:workout.id}});
+
+	for( let typeData of typeList){
+		result.push(typeData.type);
+	}
+
+	workout.dataValues.type = result;
+
+	return workout;
+}
+
+async function mergeWorkoutEffect(workout){
+	let result  = [];
+
+	let effectList = await WorkoutEffect.findAll({attributes:['effect'], where:{workout_id:workout.id}});
+
+	for( let effectData of effectList){
+		result.push(effectData.effect);
+	}
+
+	workout.dataValues.effect = result;
+
+	return workout;
+}
+
+async function mergeWorkoutHistory(workout, userId, userTargetDay){
+	let workoutHistory = await HistoryWorkout.findOne({ attributes:['score', 'pause_time'], where:{user_id:userId, date:userTargetDay, workout_id:workout.id}});
+
+	workout.dataValues.history = workoutHistory;
+
+	return workout;
+}
