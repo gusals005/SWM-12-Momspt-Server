@@ -8,7 +8,13 @@ const DATA_NOT_MATCH = {
     message: "해당 정보를 가진 유저가 없습니다."
 }
 
+const DATA_NOT_EXIST = {
+    success: false,
+    message: "해당 정보가 존재하지 않습니다."
+}
+
 module.exports = {
     KAKAO_AUTH_FAIL,
-    DATA_NOT_MATCH
+    DATA_NOT_MATCH,
+    DATA_NOT_EXIST
 }

@@ -1,6 +1,5 @@
-const router = require('express').Router()
-const workout = require('./workout')
-const planManage = require('./plan-manage')
+const router = require('express').Router();
+const workout = require('./workout');
 
 router.get('/todayworkoutlist', workout.getTodayWorkoutList);
 router.get('/workoutinfo', workout.getInfo);

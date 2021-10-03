@@ -2,7 +2,9 @@ const fs = require('fs');
 const db = require("../../database/models");
 const jwt = require('jsonwebtoken');
 const Sequelize = require('sequelize');
+const {DEFAULT_BODY_TYPE} = require('../utils');
 const User = db.user;
+const HistoryBodyType = db.history_body_type;
 
 
 /**
@@ -11,7 +13,7 @@ const User = db.user;
 exports.signup = async (req,res) => {
 	const { kakaoId, nickname, babyDue, weightBeforePregnancy, weightNow, heightNow } = req.body;
 
-	const user  = await User.findOne({attributes:{exclude:['id','createdAt','updatedAt']}, where:{kakaoId:kakaoId}});
+	let user  = await User.findOne({attributes:{exclude:['id','createdAt','updatedAt']}, where:{kakaoId:kakaoId}});
 	
 	if( user == null){
 		//User.destroy({ truncate: true, restartIdentity: true });
@@ -19,6 +21,11 @@ exports.signup = async (req,res) => {
 
 		let newUser = await User.create({id:maxId.id+1, nickname:nickname,babyDue:babyDue, weightBeforePregnancy:weightBeforePregnancy, weightNow:weightNow, heightNow:heightNow, kakaoId:kakaoId});
 		console.log('[LOG]NEW USER' + 'id : ' + newUser.id + ', nickname : ' + newUser.nickname);
+
+		maxId = await HistoryBodyType.findOne({attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']] });
+
+		let newBodyHistory = await HistoryBodyType.create({id:maxId.id+1, user_id:newUser.id, body_type_id:DEFAULT_BODY_TYPE});
+		console.log('[LOG]NEW Body History' + newBodyHistory.body_type_id);
 
 		const sendResult = {
 			"message":"Success",

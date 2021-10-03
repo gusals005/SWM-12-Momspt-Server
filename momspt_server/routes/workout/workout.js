@@ -1,6 +1,6 @@
 const fs = require('fs');
 const db = require("../../database/models");
-const { DATA_NOT_MATCH } = require('../jsonformat');
+const { DATA_NOT_MATCH, DATA_NOT_EXIST } = require('../jsonformat');
 const { kakaoAuthCheck, getUserDday, todayKTC, findBodyType, DEFAULT_BODY_TYPE} = require('../utils');
 const Workout = db.workout;
 const HistoryWorkout = db.history_workout;
@@ -11,6 +11,8 @@ const WorkoutEffect = db.workout_effect;
 const Video = db.video;
 const Sequelize = require('sequelize');
 
+const AWS = require('aws-sdk');
+require('dotenv').config({path:__dirname+ '../..'+'.env'});
 
 /* GET home page. */
 
@@ -82,16 +84,39 @@ exports.sendResult = async (req,res) => {
 }
 
 exports.getJson = async (req,res) => {
+
 	const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
     }
 
-	const resource = req.query.workoutcode +'.json';
-	const jsonFile = fs.readFileSync('./video/'+resource,'utf8');
-	json = JSON.parse(jsonFile);
+    const s3 = new AWS.S3({
+        accessKeyId:process.env.AWS_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        region:'ap-northeast-2'
+    });
 
-	res.status(200).send(json);
+
+	let param = {
+        'Bucket':'momsptbucket',
+        'Key':'json/' + req.query.workoutcode + '.json',
+    }
+
+	let json;
+
+	s3.getObject(param, function(err,data){
+		if(err){
+			console.log('[LOG]ERROR', err);
+			res.status(400).send(DATA_NOT_EXIST);
+		}
+			
+		else{
+			//console.log(data.Body.toString());
+			json = data.Body.toString();
+			res.status(200).send(json);
+		} 
+	});
+	
 }
 
 exports.weeklyWorkoutStatistics = async (req,res) => {
