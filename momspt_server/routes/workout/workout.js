@@ -2,6 +2,7 @@ const fs = require('fs');
 const db = require("../../database/models");
 const { DATA_NOT_MATCH, DATA_NOT_EXIST } = require('../jsonformat');
 const { kakaoAuthCheck, getUserDday, todayKTC, findBodyType, DEFAULT_BODY_TYPE} = require('../utils');
+const User = db.user;
 const Workout = db.workout;
 const HistoryWorkout = db.history_workout;
 const HistoryBodyType = db.history_body_type;
@@ -12,6 +13,7 @@ const Video = db.video;
 const Sequelize = require('sequelize');
 
 const AWS = require('aws-sdk');
+const { response } = require('express');
 require('dotenv').config({path:__dirname+ '../..'+'.env'});
 
 /* GET home page. */
@@ -27,6 +29,21 @@ exports.getTodayWorkoutList = async (req, res) => {
 	let result = await getWorkoutList(kakaoId, todayKTC());
 	res.status(200).json(result);
 }
+
+exports.getDayWorkoutList = async (req,res) => { 
+	const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    };
+
+	let targetDay = await convertSteptoDay(req.body.step, req.body.day);
+	const user = await User.findOne({where:{kakaoId:kakaoId}});
+	let babyDue = user.babyDue;
+	let targetDate = new Date(babyDue.setDate(babyDue.getDate() + targetDay));
+	
+	const workoutList = await getWorkoutList(kakaoId, targetDate);
+	res.status(200).json(workoutList);
+}	
 
 // 운동 상세 정보 얻기 API
 exports.getInfo = async (req, res) => {
@@ -265,4 +282,9 @@ async function mergeWorkoutHistory(workout, userId, userTargetDay){
 	workout.dataValues.history = workoutHistory;
 
 	return workout;
+}
+
+async function convertSteptoDay(step, day){
+	let stepStartDay = [1,8,31,51,101];
+	return stepStartDay[step-1] + parseInt(day)-1;
 }

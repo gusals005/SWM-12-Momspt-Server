@@ -6,7 +6,8 @@ module.exports = (sequelize, DataTypes) => {
     calorie: DataTypes.FLOAT,
     playtime: DataTypes.FLOAT,
     thumbnail:DataTypes.STRING,
-    videoCode: DataTypes.STRING
+    videoCode: DataTypes.STRING,
+    workoutCode: DataTypes.STRING
 }, {});
   workout.associate = function(models){
   };

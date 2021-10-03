@@ -16,7 +16,7 @@ exports.signup = async (req,res) => {
 	let user  = await User.findOne({attributes:{exclude:['id','createdAt','updatedAt']}, where:{kakaoId:kakaoId}});
 	
 	if( user == null){
-		//User.destroy({ truncate: true, restartIdentity: true });
+		//User.destroy({ t	runcate: true, restartIdentity: true });
 		let maxId = await User.findOne({ attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']] });
 
 		let newUser = await User.create({id:maxId.id+1, nickname:nickname,babyDue:babyDue, weightBeforePregnancy:weightBeforePregnancy, weightNow:weightNow, heightNow:heightNow, kakaoId:kakaoId});

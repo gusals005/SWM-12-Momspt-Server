@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  version: 0.0.2
-  title: Momspt service server API(21.09.26)
+  version: 0.1.0
+  title: Momspt service server API(21.10.03)
   description: 맘스피티 어플리케이션의 API 리스트입니다.
   license:
     name: MIT License
@@ -54,7 +54,7 @@ paths:
         '200':
           $ref: '#/components/responses/LoginSuccess200'
         '400':
-          $ref: '#/components/responses/BadRequestUserExist400'
+          $ref: '#/components/responses/BadRequest400'
   /user/nicknameduplicate?nickname={nickname}:
     get:
       summary: 닉네임 중복 검사 API
@@ -99,7 +99,7 @@ paths:
           $ref: '#/components/responses/BadRequest400'
         '401':
           $ref: '#/components/responses/KakaoBad401'
-  /workout/todayworkoutlist:
+  /workout/workoutlist:
     get:
       summary: 유저의 오늘 운동 리스트 API
       description: 오늘 해야할 운동에 대해서 제공받는 API이다.
@@ -115,6 +115,42 @@ paths:
           schema:
             type: string
             example: oYrz6zcyIVrNg_q3YefCDiN7FJvPOCh6CAkuSworDNMAAAF7yNc8mA
+      responses:
+        '200':
+          $ref: '#/components/responses/TodayWorkoutList200'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '401':
+          $ref: '#/components/responses/KakaoBad401'
+    post:
+      summary: 유저의 x단계 y일차 운동 리스트 API
+      description: x단계 y일차에 해야할 운동에 대해서 제공받는 API이다.
+      tags:
+        - Workout
+      consumes:
+        - application/json
+      parameters:
+        - in: header[x-access-token]
+          name: KakaoToken
+          description: Kakao 소셜 로그인 후 Access-token을 header에 실어서 전송
+          required: true
+          schema:
+            type: string
+            example: oYrz6zcyIVrNg_q3YefCDiN7FJvPOCh6CAkuSworDNMAAAF7yNc8mA
+        - in: body
+          name: Step
+          description: x단계 y일차에 대한 search 중 x 단계에 해당하는 값이다.
+          required: true
+          schema:
+            type: number
+            example: 2
+        - in: body
+          name: Day
+          description: x단계 y일차에 대한 search 중 y 일차에 해당하는 값이다.
+          required: true
+          schema:
+            type: number
+            example: 5
       responses:
         '200':
           $ref: '#/components/responses/TodayWorkoutList200'
@@ -406,7 +442,7 @@ paths:
             example: test_image.png
       responses:
         '201':
-          $ref: '#/components/responses/Success200'
+          $ref: '#/components/responses/Profile200'
         '400':
           $ref: '#/components/responses/BadRequest400'
         '401':
@@ -605,6 +641,13 @@ components:
           example:
             success: false
             message: 카카오 인증이 유효하지 않습니다.
+    Profile200:
+      description: 프로필이 정상적으로 변경되었습니다.
+      content:
+        application/json:
+          example:
+            success: true
+            profile: http://d29r6pfiojlanv.cloudfront.net/profile/e8a530ca852ec1cac22fd35bb93f8072.png
     InternalServerError:
       description: 서버 에러
       content:
@@ -614,6 +657,7 @@ components:
           example:
             success: false
             message: 서버 내부 오류
+    
   ResponseFormat:
     baseFormat:
       type: object
@@ -634,6 +678,8 @@ components:
       properties:
         success: 
           type: boolean
+        token:
+          $ref: '#/DataForm/Token'
         user:
           $ref: '#/DataForm/Signup'
     daycomment200:
@@ -653,18 +699,63 @@ components:
       items:
         type: object
         properties:
-          set_id:
+          id:
             type: number
-            format: integer
-            example: 1
-          workout_id:
-            type: number
-            format: integer
             example: 2
-          workout:
-            $ref: '#/DataForm/Workout'
+          name:
+            type: string
+            example: "앉아서 숨쉬기"
+          workoutCode:
+            type: string
+            example: "W001"
+          explanation:
+            type: string
+            example: "출산 후 가장 필수적이면서 기본이 되는 운동입니다. 혈액순환 및 림프 순환을 촉진 시켜 부종 해소에 효과적이고, 복근을 회복시켜주는데 도움을 줍니다."
+          calorie:
+            type: number
+            example: 4
+          playtime:
+            type: number
+            example: 74
+          thumbnail:
+            type: string
+            example: "http://d29r6pfiojlanv.cloudfront.net/hipbridge_thumbnail.png"
+          video:
+            type: string
+            example: "http://d29r6pfiojlanv.cloudfront.net/hipbridge.mp4"
+          videoCode:
+            type: string
+            example: V002
+          videoCheckTime:
+            type: array
+            items:
+              type: object
+              properties:
+                workoutStartTime:
+                  type: number
+                  example: 15
+                workoutFinishTime:
+                  type: number
+                  example: 74
+          type:
+            type: array
+            items:
+              type: string
+              example: 스트레칭
+          effect:
+            type: array
+            items:
+              type: string
+              example: 혈액 순환
           history:
-            $ref: '#/DataForm/History'
+            type: object
+            properties:
+              score:
+                type: string
+                example: A_PLUS
+              pause_time:
+                type: number
+                example: 0
     weeklydata:
       type: array
       items:
@@ -840,33 +931,54 @@ DataForm:
   Workout:
     type: object
     properties:
+      id:
+        type: number
+        example: 2
       name:
         type: string
-        example: "힙브릿지"
+        example: "앉아서 숨쉬기"
       workoutCode:
         type: string
         example: "W001"
       explanation:
         type: string
-        example: "코어 트레이닝을 대표하는 운동 중 하나이다. 허리를 지나치게 들어올리는 동작은 부상으로 이어질 수 있습니다."
-      type:
-        type: string
-        example: "코어 운동, 힙 운동"
+        example: "출산 후 가장 필수적이면서 기본이 되는 운동입니다. 혈액순환 및 림프 순환을 촉진 시켜 부종 해소에 효과적이고, 복근을 회복시켜주는데 도움을 줍니다."
       calorie:
         type: number
-        example: 40
+        example: 4
       playtime:
         type: number
-        example: 114
-      effect:
-        type: string
-        example: "통증 완화, 골반 안정화, 코어 강화, 자세 개선, 운동 능력 향상, 힙업"
+        example: 74
       thumbnail:
         type: string
         example: "http://d29r6pfiojlanv.cloudfront.net/hipbridge_thumbnail.png"
       video:
         type: string
         example: "http://d29r6pfiojlanv.cloudfront.net/hipbridge.mp4"
+      videoCode:
+        type: string
+        example: V002
+      videoCheckTime:
+        type: array
+        items:
+          type: object
+          properties:
+            workoutStartTime:
+              type: number
+              example: 15
+            workoutFinishTime:
+              type: number
+              example: 74
+      type:
+        type: array
+        items:
+          type: string
+          example: 스트레칭
+      effect:
+        type: array
+        items:
+          type: string
+          example: 혈액 순환
   History:
     type: object
     properties:
@@ -907,5 +1019,7 @@ DataForm:
       thumbnail:
         type: string
         example: http://d29r6pfiojlanv.cloudfront.net/hipbridge_thumbnail.png
-
+  Token:
+    type: string
+    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjQsImlhdCI6MTYzMzI3NDMxNiwiZXhwIjoxNjMzMzYwNzE2LCJzdWIiOiJ1c2VySW5mbyJ9.pVCLAkuHPnb6n1DQu7PGJ45mzg1wMd6x88VRNsovvEk
 
