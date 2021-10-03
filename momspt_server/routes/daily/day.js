@@ -94,8 +94,14 @@ exports.weeklyStatistics = async (req, res) => {
             // console.log(`[LOG] todayAnalysis - target Workout : ${targetWorkout.playtime}`);
             dayResult.workoutTime += targetWorkout.playtime;
 		};
+
+        if(dayWeightHistory == null){
+            dayResult.weight = null;
+        }
+        else{
+            dayResult.weight = dayWeightHistory.weight;
+        }
         
-        dayResult.weight = dayWeightHistory.weight;
         // console.log('[LOG] dayResult');
         // console.log(dayResult);
         sendResult.push(dayResult);

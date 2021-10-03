@@ -96,7 +96,7 @@ exports.setProfile = async (req,res)=> {
 
 
     await User.update({thumbnail:prefix+req.file.filename}, {where: {id:userInfo.id}});
-    res.status(201).send({profile:prefix+req.file.filename+'.png'});
+    res.status(201).send({success:true, profile:prefix+req.file.filename+'.png'});
 }
   
 function millisecondtoDay(milli){

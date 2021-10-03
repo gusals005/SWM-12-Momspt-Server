@@ -34,7 +34,7 @@ exports.monthlyStatistics = async (req, res) => {
         let dayResult = {};
         let completeWorkoutCheck = 0;
         let totalCheck =0;
-        dayResult.day = idx++;
+        dayResult.day = idx;
 
         if(i>0){
             if(!checkStep.includes(convertDayToStep(i)))
