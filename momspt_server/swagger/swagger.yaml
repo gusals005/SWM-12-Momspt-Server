@@ -678,8 +678,6 @@ components:
       properties:
         success: 
           type: boolean
-        token:
-          $ref: '#/DataForm/Token'
         user:
           $ref: '#/DataForm/Signup'
     daycomment200:
@@ -1019,7 +1017,4 @@ DataForm:
       thumbnail:
         type: string
         example: http://d29r6pfiojlanv.cloudfront.net/hipbridge_thumbnail.png
-  Token:
-    type: string
-    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjQsImlhdCI6MTYzMzI3NDMxNiwiZXhwIjoxNjMzMzYwNzE2LCJzdWIiOiJ1c2VySW5mbyJ9.pVCLAkuHPnb6n1DQu7PGJ45mzg1wMd6x88VRNsovvEk
 

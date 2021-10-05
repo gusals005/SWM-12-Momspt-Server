@@ -69,7 +69,7 @@ exports.nicknameDuplicateCheck = async (req,res) => {
  */
 exports.login = async (req,res) => {
 	const { kakaoId } = req.body;
-	const secret = req.app.get('jwt-secret');
+	// const secret = req.app.get('jwt-secret');
 	console.log(secret);
 
 	const user  = await User.findOne({where:{kakaoId:kakaoId}});
@@ -78,17 +78,16 @@ exports.login = async (req,res) => {
 		res.status(400).json({success:false, message: '해당 kakaoId를 가진 사용자가 없습니다.'});
 	}
 
-	const token = await jwt.sign({
-		id: user.id
-	},
-	secret,
-	{
-		expiresIn: '1d',
-		subject: 'userInfo'
-	});
+	// const token = await jwt.sign({
+	// 	id: user.id
+	// },
+	// secret,
+	// {
+	// 	expiresIn: '1d',
+	// 	subject: 'userInfo'
+	// });
 	const result = {
 		success:true,
-		token:token,
 		user:user
 	};
 	res.send(result);
