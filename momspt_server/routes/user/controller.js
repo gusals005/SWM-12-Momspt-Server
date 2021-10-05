@@ -70,7 +70,7 @@ exports.nicknameDuplicateCheck = async (req,res) => {
 exports.login = async (req,res) => {
 	const { kakaoId } = req.body;
 	// const secret = req.app.get('jwt-secret');
-	console.log(secret);
+	//console.log(secret);
 
 	const user  = await User.findOne({where:{kakaoId:kakaoId}});
 
