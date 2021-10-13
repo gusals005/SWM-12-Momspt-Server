@@ -5,6 +5,7 @@ const monthlyData = require('./month');
 
 router.get('/day/todayanalysis', dailyData.todayAnalysis);
 router.get('/day/weeklystatistics',dailyData.weeklyStatistics);
+router.post('/day/weight', dailyData.insertTodayWeight)
 
 router.get('/month/monthlystatistics',monthlyData.monthlyStatistics);
 router.post('/month/detailstatistics', monthlyData.detailStatistics);

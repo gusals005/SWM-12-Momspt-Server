@@ -7,6 +7,7 @@ const BodyType = db.body_type;
 const HistoryWeight = db.history_weight;
 const WorkoutType = db.workout_type;
 const WorkoutEffect = db.workout_effect;
+const Sequelize = require('sequelize')
 
 
 const {kakaoAuthCheck, getUserDday, todayKTC, findBodyType} = require('../utils')
@@ -108,4 +109,30 @@ exports.weeklyStatistics = async (req, res) => {
 	}
 
     res.send(sendResult);
+}
+
+exports.insertTodayWeight = async (req, res) => {
+
+    const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
+
+    const user = await getUserDday(kakaoId,todayKTC());
+
+    const searchWeightHistory = await HistoryWeight.findOne({where: {user_id:user.id, date:user.targetDay}})
+
+    console.log(searchWeightHistory)
+	if(searchWeightHistory == null){
+		//create new record
+		let maxId = await HistoryWeight.findOne({ attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']] });
+		const insertRecored = await HistoryWeight.create({id:maxId.id+1, user_id:user.id, date:user.targetDay, weight:req.body.weight});
+	}
+	else{
+		//update code
+		const updateRecord = await HistoryWeight.update({weight:req.body.weight}, {where: {user_id:user.id, date:user.targetDay}});
+		//console.log("[LOG] updateScore: ",updateScore);
+	}
+
+    res.status(200).send({success:true, message:'정상적으로 몸무게를 저장했습니다.'});
 }

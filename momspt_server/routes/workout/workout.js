@@ -87,16 +87,22 @@ exports.sendResult = async (req,res) => {
 		//create new record
 		let maxId = await HistoryWorkout.findOne({ attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']] });
 		const insertRecored = await HistoryWorkout.create({id:maxId.id+1, user_id:user.id, date:user.targetDay, workout_id:req.body.workout_id, pause_time:0, score:req.body.score})
-		res.status(200).send({success:true, message:'정상적으로 운동 결과를 저장했습니다.'});
 	}
 	else{
 		//update code
 		const updateRecord = await HistoryWorkout.update({score:req.body.score}, {where: {user_id:user.id, date:user.targetDay, workout_id:req.body.workout_id}});
 		//console.log("[LOG] updateScore: ",updateScore);
-
-		res.status(200).send({success:true, message:'정상적으로 운동 결과를 저장했습니다.'});
 	}
 
+	const workoutList = await getWorkoutList(kakaoId, new Date(req.body.date));
+	let nextWorkout = null
+	for( let workout of workoutList){
+		if (workout.dataValues.history == null){
+			nextWorkout = workout;
+			break;
+		}
+	}
+	res.status(200).send({success:true, message:'정상적으로 운동 결과를 저장했습니다.', nextWorkout: nextWorkout});
 	
 }
 

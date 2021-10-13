@@ -20,10 +20,12 @@ exports.getDayComment = async (req, res) => {
 	let d_day = (todayKTC() - user.babyDue)/(1000*3600*24);
 	d_day = Math.floor(d_day);
 	
-	const userComment = getComment(d_day);
+	const {userComment, step, day} = getComment(d_day);
 	const dayComment = {
 		success:true,
 		dayAfterBabyDue:d_day,
+		step:step,
+		day:day,
 		comment:userComment
 	}
 	res.status(200).json(dayComment);
@@ -39,18 +41,31 @@ function getComment(d_day){
 		step5:'임신 전보다 더 아름다운 몸매를 만들어줄 근육 강화운동을 하는 시기'
 	};
 
-	var user_comment = null;
+	let userComment = null;
+	let step = -1;
+	let day = -1;
 	console.log(d_day)
-	if(d_day >=101)
-		user_comment = comments.step5;
-	else if(d_day>=51)	
-		user_comment = comments.step4;
-	else if(d_day>=31)
-		user_comment = comments.step3;
-	else if(d_day>=8)
-		user_comment = comments.step2;
-	else
-		user_comment = comments.step1;
-	
-	return user_comment;
+	if(d_day >=101){
+		userComment = comments.step5;
+		step = 5;
+		day = d_day - 100
+	} else if(d_day>=51){
+		userComment = comments.step4;
+		step = 4;
+		day = d_day - 50
+	} else if(d_day>=31){
+		userComment = comments.step3;
+		step = 3;
+		day = d_day - 30
+	} else if(d_day>=8){
+		userComment = comments.step2;
+		step = 2;
+		day = d_day - 7
+	} else{
+		userComment = comments.step1;
+		step = 1;
+		day = d_day
+	}
+
+	return {userComment, step, day};
 }

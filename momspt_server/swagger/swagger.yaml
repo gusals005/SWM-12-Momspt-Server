@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  version: 0.1.0
-  title: Momspt service server API(21.10.03)
+  version: 0.1.1
+  title: Momspt service server API(21.10.13)
   description: 맘스피티 어플리케이션의 API 리스트입니다.
   license:
     name: MIT License
@@ -357,6 +357,36 @@ paths:
           $ref: '#/components/responses/BadRequest400'
         '401':
           $ref: '#/components/responses/KakaoBad401'
+  /daily/day/workout:
+    post:
+      summary: 몸무게 입력 API
+      description: 오늘의 몸무게를 입력하는 API입니다.
+      tags:
+        - Daily
+      consumes:
+        - application/json
+      parameters:
+        - in: header[x-access-token]
+          name: KakaoToken
+          description: Kakao 소셜 로그인 후 Access-token을 header에 실어서 전송
+          required: true
+          schema:
+            type: string
+            example: oYrz6zcyIVrNg_q3YefCDiN7FJvPOCh6CAkuSworDNMAAAF7yNc8mA
+        - in: body
+          name: weight
+          description: 몸무게에 대한 정보입니다.
+          required: true
+          schema:
+            type: number
+            example: 54.5
+      responses:
+        '200':
+          $ref: '#/components/responses/WeightSuccess200'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '401':
+          $ref: '#/components/responses/KakaoBad401'
   /day/month/detailstatistics:
     post:
       summary: 하루 운동량에 대한 정보 API
@@ -565,10 +595,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/ResponseFormat/baseFormat'
-          example:
-            success: true
-            message: 정상적으로 운동 결과를 저장했습니다.
+            $ref: '#/components/ResponseFormat/workoutResult200'
     WorkoutResult400:
       description: 요청하신 정보에 해당하는 데이터가 없습니다.
       content:
@@ -605,6 +632,15 @@ components:
         application/json:
           schema:
             $ref: '#/components/ResponseFormat/weeklystatistics'
+    WeightSuccess200:
+      description: 올바른 요청이므로 정보를 제공합니다.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/ResponseFormat/baseFormat'
+          example:
+            success: true
+            message: 정상적으로 몸무게를 저장했습니다.
     monthlystatistics200:
       description: 올바른 요청이므로 정보를 제공합니다.
       content:
@@ -689,9 +725,26 @@ components:
           type: number
           format: integer
           example: 25
+        step:
+          type: number
+          example: 3
+        day:
+          type: number
+          example: 2
         comment:
           type: string
           example: 임신 기간 중 약화된 근력과 체형\n 변형으로 뻣뻣해진 관절의 유연성\n을 회복시켜주는 가벼운 스트레칭부터 시작
+    workoutResult200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "정상적으로 운동 결과를 저장했습니다."
+        workout:
+          $ref: '#/DataForm/Workout'
     todayworkoutlist:
       type: array
       items:
@@ -823,8 +876,19 @@ components:
           type: number
           example: 57.4
         bodyType:
-          type: string
-          example: "골반이 오른쪽 위로 올라간 체형입니다."
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: number
+                example: 1
+              name:
+                type: string
+                example: 기본 체형
+              explanation:
+                type: string
+                example: "출산 후 기본 체형에 해당합니다."
     weeklystatistics:
       type: array
       items:
@@ -977,6 +1041,15 @@ DataForm:
         items:
           type: string
           example: 혈액 순환
+      history:
+        type: object
+        properties:
+          score:
+            type: string
+            example: A_PLUS
+          pause_time:
+            type: number
+            example: 0
   History:
     type: object
     properties:
