@@ -320,6 +320,36 @@ paths:
           $ref: '#/components/responses/BadRequest400'
         '401':
           $ref: '#/components/responses/KakaoBad401'
+  /daily/day/weight:
+    post:
+      summary: 몸무게 입력 API
+      description: 오늘의 몸무게를 입력하는 API입니다.
+      tags:
+        - Daily
+      consumes:
+        - application/json
+      parameters:
+        - in: header[x-access-token]
+          name: KakaoToken
+          description: Kakao 소셜 로그인 후 Access-token을 header에 실어서 전송
+          required: true
+          schema:
+            type: string
+            example: oYrz6zcyIVrNg_q3YefCDiN7FJvPOCh6CAkuSworDNMAAAF7yNc8mA
+        - in: body
+          name: weight
+          description: 몸무게에 대한 정보입니다.
+          required: true
+          schema:
+            type: number
+            example: 54.5
+      responses:
+        '200':
+          $ref: '#/components/responses/WeightSuccess200'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '401':
+          $ref: '#/components/responses/KakaoBad401'
   /daily/month/monthlystatistics?year={year}&month={month}:
     get:
       summary: 한 달의 운동량 API
@@ -353,36 +383,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/monthlystatistics200'
-        '400':
-          $ref: '#/components/responses/BadRequest400'
-        '401':
-          $ref: '#/components/responses/KakaoBad401'
-  /daily/day/workout:
-    post:
-      summary: 몸무게 입력 API
-      description: 오늘의 몸무게를 입력하는 API입니다.
-      tags:
-        - Daily
-      consumes:
-        - application/json
-      parameters:
-        - in: header[x-access-token]
-          name: KakaoToken
-          description: Kakao 소셜 로그인 후 Access-token을 header에 실어서 전송
-          required: true
-          schema:
-            type: string
-            example: oYrz6zcyIVrNg_q3YefCDiN7FJvPOCh6CAkuSworDNMAAAF7yNc8mA
-        - in: body
-          name: weight
-          description: 몸무게에 대한 정보입니다.
-          required: true
-          schema:
-            type: number
-            example: 54.5
-      responses:
-        '200':
-          $ref: '#/components/responses/WeightSuccess200'
         '400':
           $ref: '#/components/responses/BadRequest400'
         '401':
