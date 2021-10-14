@@ -29,7 +29,7 @@ exports.todayAnalysis = async (req, res) => {
         res.status(400).json(DATA_NOT_MATCH);
     }
 
-    const doneWorkoutList = await HistoryWorkout.findAll({where:{user_id:userInfo.id,date:userInfo.targetDay}});
+    const doneWorkoutList = await HistoryWorkout.findAll({where:{user_id:userInfo.id, date:userInfo.targetDay}});
 
     for( let history of doneWorkoutList){
         const targetWorkout = await Workout.findOne({where:{id:history.workout_id}});
@@ -39,8 +39,8 @@ exports.todayAnalysis = async (req, res) => {
         totalKcal += targetWorkout.calorie;
     }
 
-    const user = await User.findOne({where:{id:userInfo.id}}); 
-    weightNow = user.weightNow;
+    const userWeightInfo = await HistoryWeight.findAll({where:{user_id:userInfo.id, date:userInfo.targetDay}, order:[['createdAt', 'desc']]}); 
+    weightNow = userWeightInfo[0].weight;
 
     const bodyTypeIdList = await findBodyType(userInfo.id, todayKTC());
 
