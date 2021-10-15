@@ -40,7 +40,11 @@ exports.todayAnalysis = async (req, res) => {
     }
 
     const userWeightInfo = await HistoryWeight.findAll({where:{user_id:userInfo.id, date:userInfo.targetDay}, order:[['createdAt', 'desc']]}); 
-    weightNow = userWeightInfo[0].weight;
+    
+    if (userWeightInfo.length != 0){
+        weightNow = userWeightInfo[0].weight;
+    }
+    
 
     const bodyTypeIdList = await findBodyType(userInfo.id, todayKTC());
 
