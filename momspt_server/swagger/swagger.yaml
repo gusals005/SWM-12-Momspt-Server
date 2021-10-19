@@ -777,6 +777,9 @@ components:
           videoCode:
             type: string
             example: V002
+          ai:
+            type: Boolean
+            example: true
           videoCheckTime:
             type: array
             items:
@@ -937,6 +940,12 @@ components:
           kcal:
             type: number
             example: 115
+          step:
+            type: number
+            example: 2
+          day:
+            type: number
+            example: 8
           workout:
             $ref: '#/components/ResponseFormat/todayworkoutlist'
           
@@ -1020,6 +1029,9 @@ DataForm:
       videoCode:
         type: string
         example: V002
+      ai:
+        type: Boolean
+        example: true
       videoCheckTime:
         type: array
         items:
