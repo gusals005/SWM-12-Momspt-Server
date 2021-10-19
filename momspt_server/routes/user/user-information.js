@@ -69,3 +69,5 @@ function getComment(d_day){
 
 	return {userComment, step, day};
 }
+
+exports.getComment = getComment

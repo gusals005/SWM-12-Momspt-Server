@@ -10,6 +10,7 @@ const WorkoutEffect = db.workout_effect;
 const PtPlanData = db.pt_plan_data;
 const {kakaoAuthCheck, getUserDday, todayKTC, findBodyType} = require('../utils');
 const {getWorkoutList} = require('../workout/workout');
+const {getComment} = require('../user/user-information')
 
 exports.monthlyStatistics = async (req, res) => {
     const kakaoId = await kakaoAuthCheck(req);
@@ -23,7 +24,8 @@ exports.monthlyStatistics = async (req, res) => {
 
     const userInfoFirstDay = await getUserDday(kakaoId, firstDate);
     let startDay = userInfoFirstDay.targetDay;
-    let lastDay = startDay + millisecondtoDay(lastDate - firstDate) +1;
+    let lastDay = startDay + millisecondtoDay(lastDate - firstDate);
+    
 
     let sendResult = [];
     
@@ -108,6 +110,19 @@ exports.detailStatistics = async (req,res) => {
     let totalKcal = 0;
     let workoutList = await getWorkoutList(kakaoId, new Date(req.body.date));
 
+    const user = await getUserDday(kakaoId, new Date(req.body.date))
+    
+    let step, day
+    if(user.targetDay >0){
+        data = getComment(user.targetDay)
+        step = data.step
+        day = data.day
+    }else{
+        step = 0
+        day = 0
+    }
+    
+
     for( let workout of workoutList){
         if(workout.dataValues.history != null){
             totalTime += workout.playtime;
@@ -118,6 +133,8 @@ exports.detailStatistics = async (req,res) => {
     let response = {
         time:totalTime,
         kcal:totalKcal,
+        step:step,
+        day:day,
         workout:workoutList
     }
 
