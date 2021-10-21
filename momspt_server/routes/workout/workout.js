@@ -53,7 +53,7 @@ exports.getInfo = async (req, res) => {
         res.status(401).json(KAKAO_AUTH_FAIL);
     }
 
-	let workout = await Workout.findOne({ attributes: ['id','name', 'workoutCode' ,'explanation','calorie','playtime', 'thumbnail', 'videoCode'], where : {workoutCode:req.query.workoutcode}});
+	let workout = await Workout.findOne({ attributes: ['id','name', 'workoutCode' ,'explanation','calorie','playtime','thumbnail', 'videoCode','ai'], where : {workoutCode:req.query.workoutcode}});
 	console.log(workout.dataValues);
 	workout = await mergeVideoInfo(workout);
 	workout = await mergeWorkoutType(workout);
