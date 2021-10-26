@@ -15,7 +15,7 @@ const WorkoutType = db.workout_type;
 const WorkoutEffect = db.workout_effect;
 
 const {kakaoAuthCheck, getUserDday, todayKTC} = require('../utils');
-const { KAKAO_AUTH_FAIL, DATA_NOT_MATCH } = require('../jsonformat');
+const { KAKAO_AUTH_FAIL, DATA_NOT_MATCH, UPDATE_FAIL } = require('../jsonformat');
 
 exports.mypageInfomation = async (req,res) =>{
     
@@ -43,6 +43,21 @@ exports.mypageInfomation = async (req,res) =>{
 
     res.status(200).send(sendResult);
 }
+exports.changeInfomation = async(req,res) =>{
+    let kakaoId = await kakaoAuthCheck(req);
+
+    if(kakaoId < 0){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
+    const userInfo = await getUserDday(kakaoId,todayKTC());
+
+    const updateUser = await User.update({nickname:req.body.nickname, babyName:req.body.babyName}, {where: {id:userInfo.id}});
+    if (updateUser != 1){
+        res.status(400).send(UPDATE_FAIL)
+    }
+
+    res.status(200).send({success:true, message:'정상적으로 요청을 수행했습니다.'})
+}
 
 exports.setProfile = async (req,res)=> {
 
@@ -56,7 +71,7 @@ exports.setProfile = async (req,res)=> {
         res.status(400).json(DATA_NOT_MATCH);
     }
     
-    const prefix = 'http://d29r6pfiojlanv.cloudfront.net/profile/';
+    const prefix = 'https://momsptbucket.s3.ap-northeast-2.amazonaws.com/profile/';
     const s3 = new AWS.S3({
         accessKeyId:process.env.AWS_ACCESS_KEY,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -95,7 +110,7 @@ exports.setProfile = async (req,res)=> {
     });
 
 
-    await User.update({thumbnail:prefix+req.file.filename}, {where: {id:userInfo.id}});
+    await User.update({thumbnail:prefix+req.file.filename + '.png'}, {where: {id:userInfo.id}});
     res.status(201).send({success:true, profile:prefix+req.file.filename+'.png'});
 }
   

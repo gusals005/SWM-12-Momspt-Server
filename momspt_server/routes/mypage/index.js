@@ -5,6 +5,7 @@ const multer = require('multer');
 const upload = multer({dest:'uploads/'});
 
 router.get('/info', mypageInfo.mypageInfomation);
+router.post('/info', mypageInfo.changeInfomation);
 router.post('/profile', upload.single('file'),mypageInfo.setProfile);
 
 module.exports = router;

@@ -5,7 +5,9 @@ const Sequelize = require('sequelize');
 const {DEFAULT_BODY_TYPE} = require('../utils');
 const User = db.user;
 const HistoryBodyType = db.history_body_type;
-
+const HistoryWeight = db.history_weight;
+const HistoryWorkout = db.history_workout;
+const {kakaoAuthCheck, getUserDday, todayKTC} = require('../utils');
 
 /**
  * 회원가입 API
@@ -19,7 +21,7 @@ exports.signup = async (req,res) => {
 		//User.destroy({ t	runcate: true, restartIdentity: true });
 		let maxId = await User.findOne({ attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']] });
 
-		let newUser = await User.create({id:maxId.id+1, nickname:nickname,babyDue:babyDue, weightBeforePregnancy:weightBeforePregnancy, weightNow:weightNow, heightNow:heightNow, kakaoId:kakaoId});
+		let newUser = await User.create({id:maxId.id+1, nickname:nickname,babyDue:babyDue, weightBeforePregnancy:weightBeforePregnancy, weightNow:weightNow, heightNow:heightNow, kakaoId:kakaoId, babyName:""});
 		console.log('[LOG]NEW USER' + 'id : ' + newUser.id + ', nickname : ' + newUser.nickname);
 
 		maxId = await HistoryBodyType.findOne({attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']] });
@@ -46,6 +48,20 @@ exports.signup = async (req,res) => {
 			"message": "해당 kakaoId를 가진 유저가 존재합니다."
 		});
 	}
+}
+
+exports.withdrawal = async(req, res)=>{
+	const kakaoId = await kakaoAuthCheck(req);
+    if( kakaoId < 0 ){
+        res.status(401).json(KAKAO_AUTH_FAIL);
+    }
+	const user = await getUserDday(kakaoId,new Date(req.body.date));
+	
+	const deleteWeight = await HistoryWeight.destroy({where:{user_id:user.id}})
+	const deleteBodyType = await HistoryBodyType.destroy({where:{user_id:user.id}})
+	const deleteHistoryWorkout = await HistoryWorkout.destroy({where:{user_id:user.id}})
+	const deleteUser = await User.destroy({where:{id:user.id}});
+	res.status(200).send({success:true, message:'정상적으로 요청을 수행했습니다.'})
 }
 
 /**

@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  version: 0.1.1
-  title: Momspt service server API(21.10.13)
+  version: 0.2.0
+  title: Momspt service server API(21.10.26)
   description: 맘스피티 어플리케이션의 API 리스트입니다.
   license:
     name: MIT License
@@ -32,6 +32,27 @@ paths:
             $ref: '#/DataForm/Signup'
       responses:
         '201':
+          $ref: '#/components/responses/SignupSuccess201'
+        '400':
+          $ref: '#/components/responses/BadRequestUserExist400'
+  /user/withdrawal:
+    delete:
+      summary: 회원탈퇴 API
+      description: 유저가 회원탈퇴 시 사용되는 API입니다.
+      tags:
+        - User-Controller
+      consumes:
+        - "application/json"
+      parameters:
+        - in: header[x-access-token]
+          name: KakaoToken
+          description: Kakao 소셜 로그인 후 Access-token을 header에 실어서 전송
+          required: true
+          schema:
+            type: string
+            example: oYrz6zcyIVrNg_q3YefCDiN7FJvPOCh6CAkuSworDNMAAAF7yNc8mA
+      responses:
+        '200':
           $ref: '#/components/responses/SignupSuccess201'
         '400':
           $ref: '#/components/responses/BadRequestUserExist400'
@@ -447,6 +468,48 @@ paths:
           $ref: '#/components/responses/BadRequest400'
         '401':
           $ref: '#/components/responses/KakaoBad401'
+    post:
+      summary: 마이페이지 내 정보를 수정하는 API
+      description: mypage에서 쓰이는 정보를 수정하는 API입니다.
+      tags:
+        - User-Infomation
+      consumes:
+        - application/json
+      parameters:
+        - in: header[x-access-token]
+          name: KakaoToken
+          description: Kakao 소셜 로그인 후 Access-token을 header에 실어서 전송
+          required: true
+          schema:
+            type: string
+            example: oYrz6zcyIVrNg_q3YefCDiN7FJvPOCh6CAkuSworDNMAAAF7yNc8mA
+        - in: body
+          name: nickname
+          description: 닉네임을 변경합니다.
+          required: true
+          schema:
+            type: object
+            properties:
+              nickname:
+                type: string
+                example: fit
+        - in: body
+          name: babyName
+          description: 아이의 태명을 변경합니다.
+          required: true
+          schema:
+            type: object
+            properties:
+              babyName:
+                type: string
+                example: 튼튼이
+      responses:
+        '200':
+          $ref: '#/components/responses/Success200'
+        '400':
+          $ref: '#/components/responses/BadRequest400'
+        '401':
+          $ref: '#/components/responses/KakaoBad401'
   /mypage/profile:
     post:
       summary: 마이페이지 프로필 사진 설정 API
@@ -512,6 +575,15 @@ components:
         application/json:
           schema:
             $ref: '#/components/ResponseFormat/signup201'
+    WithdrawalSuccess200:
+      description: 회원정보를 삭제합니다.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/ResponseFormat/baseFormat'
+          example:
+            success: true
+            massage: 정상적으로 요청을 수행했습니다.
     BadRequestUserExist400:
       description: 해당 정보를 가진 유저가 존재합니다.
       content:
