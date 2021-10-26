@@ -8,7 +8,8 @@ module.exports = (sequelize, DataTypes) => {
     thumbnail:DataTypes.STRING,
     videoCode: DataTypes.STRING,
     workoutCode: DataTypes.STRING,
-    ai:DataTypes.BOOLEAN
+    ai:DataTypes.BOOLEAN,
+    workoutAnalysisType: DataTypes.STRING
 }, {});
   workout.associate = function(models){
   };

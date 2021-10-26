@@ -53,7 +53,7 @@ paths:
             example: oYrz6zcyIVrNg_q3YefCDiN7FJvPOCh6CAkuSworDNMAAAF7yNc8mA
       responses:
         '200':
-          $ref: '#/components/responses/SignupSuccess201'
+          $ref: '#/components/responses/WithdrawalSuccess200'
         '400':
           $ref: '#/components/responses/BadRequestUserExist400'
   /user/login:
@@ -67,7 +67,7 @@ paths:
       parameters:
         - in: body
           name: body
-          description: Login 시 request 형식
+          description: Login 시 request 형식 
           required: true
           schema:
             $ref: '#/DataForm/Login'
@@ -852,6 +852,9 @@ components:
           ai:
             type: Boolean
             example: true
+          workoutAnanlysisType:
+            type: string
+            example: COUNTING
           videoCheckTime:
             type: array
             items:
@@ -903,7 +906,7 @@ components:
         properties:
           workout:
             type: string
-            example: uparmleg.mp4
+            example: W001.mp4
           height:
             type: number
             example: 720
@@ -1104,6 +1107,9 @@ DataForm:
       ai:
         type: Boolean
         example: true
+      workoutAnalysisType:
+        type: string
+        example : COUNTING  
       videoCheckTime:
         type: array
         items:
