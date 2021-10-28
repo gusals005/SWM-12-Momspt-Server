@@ -8,10 +8,13 @@ const HistoryBodyType = db.history_body_type;
 const HistoryWeight = db.history_weight;
 const HistoryWorkout = db.history_workout;
 const {kakaoAuthCheck, getUserDday, todayKTC} = require('../utils');
-
+const axios = require('axios')
+const path  = require('path')
+const FormData = require('form-data');
+const { response } = require('express');
 /**
  * 회원가입 API
- */
+ */ 
 exports.signup = async (req,res) => {
 	const { kakaoId, nickname, babyDue, weightBeforePregnancy, weightNow, heightNow } = req.body;
 
@@ -115,15 +118,29 @@ exports.bodyTypeGlb = async (req, res) => {
 	// console.log(req.query.id);
     // console.log(req.file);
     // console.log(req.file.path);
+
+	console.log(req.file)
     
     var filePath = path.join(__dirname, '../..', 'uploads' ,req.file.filename);
-    console.log(filePath);
-    fs.access(filePath, fs.constants.F_OK, (err)=>{
-         if(err) return console.log('삭제 불가능 파일');
+    // console.log(filePath);
+	
+	let formdata = new FormData();
+	
+	formdata.append('file', fs.createReadStream(filePath))
+	console.log(formdata.getHeaders());
+	
+	await axios.post('http://125.129.117.140:4500/upload',formdata,{
+		headers:formdata.getHeaders()
+	}).then(res=>console.log(res))
+	.catch(err=>console.log(err))
+	
+	// console.log(data)
+    // fs.access(filePath, fs.constants.F_OK, (err)=>{
+    //      if(err) return console.log('삭제 불가능 파일');
 
-         fs.unlink(filePath, (err)=> err?
-         console.log(err) : console.log(`${filePath}를 정상적으로 삭제하였습니다.`));    
-    });
+    //      fs.unlink(filePath, (err)=> err?
+    //      console.log(err) : console.log(`${filePath}를 정상적으로 삭제하였습니다.`));    
+    // });
 
     res.send("test");
 	// response는 glb file 주소
