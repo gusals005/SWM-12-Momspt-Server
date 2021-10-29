@@ -12,6 +12,10 @@ const axios = require('axios')
 const path  = require('path')
 const FormData = require('form-data');
 const { response } = require('express');
+const { NONAME } = require('dns');
+
+const AWS = require('aws-sdk');
+require('dotenv').config({path:__dirname+ '../..'+'.env'});
 /**
  * 회원가입 API
  */ 
@@ -115,43 +119,103 @@ exports.login = async (req,res) => {
 
 exports.bodyTypeGlb = async (req, res) => {
 	// request 는 video
-	// console.log(req.query.id);
-    // console.log(req.file);
-    // console.log(req.file.path);
-
 	console.log(req.file)
     
     var filePath = path.join(__dirname, '../..', 'uploads' ,req.file.filename);
-    // console.log(filePath);
 	
 	let formdata = new FormData();
+	let filedata = fs.createReadStream(filePath);
 	
-	formdata.append('file', fs.createReadStream(filePath))
-	console.log(formdata.getHeaders());
-	
+	let result = {};
+	formdata.append('file', filedata, req.file.filename);
 	await axios.post('http://125.129.117.140:4500/upload',formdata,{
 		headers:formdata.getHeaders()
-	}).then(res=>console.log(res))
+	}).then(res=>{
+		
+		let {bodyComment, workoutComment} = shapeToStr(res.data.genuVarum, res.data.pelvicImbalance, res.data.pelvicTilt);
+		result.bodyComment = bodyComment;
+		result.workoutComment = workoutComment;
+		console.log(res.data)
+		return axios.get('http://125.129.117.140:4500' + res.data.glbURL)
+	})
+	.then(res => {
+		const s3 = new AWS.S3({
+			accessKeyId:process.env.AWS_ACCESS_KEY,
+			secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+			region:'ap-northeast-2'
+		});
+
+		let param = {
+			'Bucket':'momsptbucket',
+			'Key':'glb/' + (req.file.filename).split('.')[0] + '.glb',
+			'ACL':'public-read',
+			'Body':res.data,
+			'ContentType':'model/gltf-binary'
+		}
+		
+		s3.upload(param, function(err, data){
+			if(err) {
+				console.log(err);
+			}
+			console.log(data);
+		});
+		console.log('s3 업로드 완료')
+
+		const prefix = 'https://momsptbucket.s3.ap-northeast-2.amazonaws.com/glb/';
+
+		result.glbURL = prefix + (req.file.filename).split('.')[0] +  '.glb'
+	})
 	.catch(err=>console.log(err))
+
+
+	res.send(result);
+
+}
+
+function shapeToStr(genuVarum, pelvicImbalance, pelvicTilt){
+	let bodyComment = ""
+	let workoutComment = ""
+
+	let pelvicTiltComment = ""
+	let pelvicImbalanceComment = ""
+	let genuVarumComment = ""
+
+	if(pelvicTilt == "Anterior"){
+		pelvicTiltComment = "전방경사"
+	}else if(pelvicTilt == "Normal"){
+		pelvicTiltComment = "정상"
+	}else if(pelvicTilt == "Posterior"){
+		pelvicTiltComment = "후방경사"
+	}
+	if(pelvicImbalance == "Left"){
+		pelvicImbalanceComment = "좌측 상승"
+	}else if(pelvicImbalance == "Normal"){
+		pelvicImbalanceComment = "정상"
+	}else if(pelvicImbalance == "Right"){
+		pelvicImbalanceComment = "우측 상승"
+	}
+
+	if(genuVarum == "O_Leg"){
+		genuVarumComment = "O다리"
+	}else if(genuVarum == "Normal"){
+		genuVarumComment = "정상"
+	}else if(genuVarum == "X_Leg"){
+		genuVarumComment = "우측 상승"
+	}
+
+	bodyComment = '척추에 대해서 ' + pelvicTiltComment + '이고, 골반에 대해서 ' + pelvicImbalanceComment + '이며, '
+				+ '다리의 형태는 ' + genuVarumComment + '입니다.';
 	
-	// console.log(data)
-    // fs.access(filePath, fs.constants.F_OK, (err)=>{
-    //      if(err) return console.log('삭제 불가능 파일');
+	workoutComment = ((pelvicTiltComment == "정상") ? "" : (pelvicTiltComment + ', '))
+					+ ((pelvicImbalanceComment == "정상")? "":(pelvicImbalanceComment)) 
+					+ ((genuVarumComment == "정상") ? " 교정 운동을 추천드리겠습니다.":(', ' + genuVarumComment + ' 교정 운동을 추천드리겠습니다.'))
 
-    //      fs.unlink(filePath, (err)=> err?
-    //      console.log(err) : console.log(`${filePath}를 정상적으로 삭제하였습니다.`));    
-    // });
+	if(pelvicTiltComment=="정상" && pelvicImbalanceComment == "정상" && genuVarumComment =="정상"){
+		workoutComment = "체형에 대해서 크게 문제되는 점이 없어 기본 운동들로 추천해드리겠습니다."
+	}
 
-    res.send("test");
-	// response는 glb file 주소
+	console.log(pelvicTiltComment == "정상", pelvicImbalanceComment == "정상",genuVarumComment == "정상")
+	console.log(workoutComment)
+	return {bodyComment, workoutComment}
+
 }
-
-exports.bodyTypeAnalysis = async (req, res) => {
-	//response
-	const sendResult = {
-		"bodyType":"Analysis1",
-		"workoutComment":"Analysis2"
-	};
-	res.status(200).send(sendResult);
-}
-
