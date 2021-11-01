@@ -24,7 +24,7 @@ services:
       - ./data/certbot/www:/var/www/certbot
     entrypoint : "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
   node1:
-    image: momspt_server:0.5.9
+    image: momspt_server:0.6.2
     container_name: node1
     expose:
       - '3000'
