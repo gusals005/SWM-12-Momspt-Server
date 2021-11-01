@@ -30,9 +30,8 @@ async function kakaoAuth(access_token){
 		result = -1;
 		console.log('error : ', error);
 	});
-
 	//FOR TSET
-	result = 1896724603;
+	// result = 1896724603;
 	
 	return result
 } 
