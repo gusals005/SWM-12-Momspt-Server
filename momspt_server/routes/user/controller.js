@@ -135,41 +135,41 @@ exports.bodyTypeGlb = async (req, res) => {
 		let {bodyComment, workoutComment} = shapeToStr(res.data.genuVarum, res.data.pelvicImbalance, res.data.pelvicTilt);
 		result.bodyComment = bodyComment;
 		result.workoutComment = workoutComment;
+		result.glbURL = 'http://125.129.117.140:4500' + res.data.glbURL;
 		console.log(res.data)
-		return axios.get('http://125.129.117.140:4500' + res.data.glbURL)
+		// return axios.get('http://125.129.117.140:4500' + res.data.glbURL)
 	})
-	.then(res => {
-		const s3 = new AWS.S3({
-			accessKeyId:process.env.AWS_ACCESS_KEY,
-			secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-			region:'ap-northeast-2'
-		});
+	// .then(res => {
+	// 	console.log(res)
+	// 	const s3 = new AWS.S3({
+	// 		accessKeyId:process.env.AWS_ACCESS_KEY,
+	// 		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+	// 		region:'ap-northeast-2'
+	// 	});
 
-		let param = {
-			'Bucket':'momsptbucket',
-			'Key':'glb/' + (req.file.filename).split('.')[0] + '.glb',
-			'ACL':'public-read',
-			'Body':res.data,
-			'ContentType':'model/gltf-binary'
-		}
+	// 	let param = {
+	// 		'Bucket':'momsptbucket',
+	// 		'Key':'glb/' + (req.file.filename).split('.')[0] + '.glb',
+	// 		'ACL':'public-read',
+	// 		'Body':res.data,
+	// 		'ContentType':'model/gltf-binary'
+	// 	}
 		
-		s3.upload(param, function(err, data){
-			if(err) {
-				console.log(err);
-			}
-			console.log(data);
-		});
-		console.log('s3 업로드 완료')
+	// 	s3.upload(param, function(err, data){
+	// 		if(err) {
+	// 			console.log(err);
+	// 		}
+	// 		console.log(data);
+	// 	});
+	// 	console.log('s3 업로드 완료')
 
-		const prefix = 'https://momsptbucket.s3.ap-northeast-2.amazonaws.com/glb/';
+	// 	const prefix = 'https://momsptbucket.s3.ap-northeast-2.amazonaws.com/glb/';
 
-		result.glbURL = prefix + (req.file.filename).split('.')[0] +  '.glb'
-	})
+	// 	result.glbURL = prefix + (req.file.filename).split('.')[0] +  '.glb'
+	// })
 	.catch(err=>console.log(err))
-
-
+	
 	res.send(result);
-
 }
 
 function shapeToStr(genuVarum, pelvicImbalance, pelvicTilt){
