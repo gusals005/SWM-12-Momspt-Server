@@ -7,10 +7,9 @@ const BodyType = db.body_type;
 const HistoryWeight = db.history_weight;
 const WorkoutType = db.workout_type;
 const WorkoutEffect = db.workout_effect;
-const Sequelize = require('sequelize')
-
-
-const {kakaoAuthCheck, getUserDday, todayKTC, findBodyType} = require('../utils')
+const Sequelize = require('sequelize');
+const {kakaoAuthCheck, getUserDday, todayKTC, findBodyType} = require('../utils');
+const {DATA_NOT_MATCH, KAKAO_AUTH_FAIL} = require('../jsonformat');
 
 exports.todayAnalysis = async (req, res) => {
 
@@ -22,11 +21,13 @@ exports.todayAnalysis = async (req, res) => {
     const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+        return;
     }
 
 	const userInfo = await getUserDday(kakaoId,todayKTC());
     if ( !userInfo.id <0){
         res.status(400).json(DATA_NOT_MATCH);
+        return;
     }
 
     const doneWorkoutList = await HistoryWorkout.findAll({where:{user_id:userInfo.id, date:userInfo.targetDay}});
@@ -63,6 +64,7 @@ exports.weeklyStatistics = async (req, res) => {
     const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+        return;
     }
 
 	//오늘이 출산일 이후 며칠인지 계산.
@@ -85,7 +87,7 @@ exports.weeklyStatistics = async (req, res) => {
 		let nowTargetDay = userInfoSunday.targetDay + i;
 
 		const dayWeightHistory = await HistoryWeight.findOne({ where:{user_id:userInfoSunday.id, date:nowTargetDay} })
-										.catch((err)=>{	console.log(err); });
+										.catch((err)=>{	console.log(err);});
 
         const dayWorkoutHistory = await HistoryWorkout.findAll({ where:{user_id:userInfoSunday.id, date:nowTargetDay} })
                     .catch((err)=>{	console.log(err); });
@@ -120,6 +122,7 @@ exports.insertTodayWeight = async (req, res) => {
     const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+        return;
     }
 
     const user = await getUserDday(kakaoId,todayKTC());

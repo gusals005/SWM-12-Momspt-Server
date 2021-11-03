@@ -16,6 +16,7 @@ exports.monthlyStatistics = async (req, res) => {
     const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+        return;
     }
 
     let firstDate = UTCToKST(new Date(parseInt(req.query.year), parseInt(req.query.month)-1, 1));
@@ -104,6 +105,7 @@ exports.detailStatistics = async (req,res) => {
     const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+        return;
     }
 
     let totalTime = 0;

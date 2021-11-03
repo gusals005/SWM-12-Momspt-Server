@@ -21,5 +21,6 @@ const UPDATE_FAIL = {
 module.exports = {
     KAKAO_AUTH_FAIL,
     DATA_NOT_MATCH,
-    DATA_NOT_EXIST
+    DATA_NOT_EXIST,
+    UPDATE_FAIL
 }

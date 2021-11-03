@@ -2,7 +2,7 @@ const fs = require('fs');
 const db = require("../../database/models");
 const jwt = require('jsonwebtoken');
 const Sequelize = require('sequelize');
-const {DEFAULT_BODY_TYPE} = require('../utils');
+const {DEFAULT_BODY_TYPE, X_Leg_BODY_TYPE, PELVICIMBALANCE_BODY_TYPE, Anterior_BODY_TYPE, Posterior_BODY_TYPE, ANTERIOR_BODY_TYPE, POSTERIOR_BODY_TYPE} = require('../utils');
 const User = db.user;
 const HistoryBodyType = db.history_body_type;
 const HistoryWeight = db.history_weight;
@@ -20,20 +20,21 @@ require('dotenv').config({path:__dirname+ '../..'+'.env'});
  * 회원가입 API
  */ 
 exports.signup = async (req,res) => {
+	console.log(req.body)  
 	const { kakaoId, nickname, babyDue, weightBeforePregnancy, weightNow, heightNow } = req.body;
 
 	let user  = await User.findOne({attributes:{exclude:['id','createdAt','updatedAt']}, where:{kakaoId:kakaoId}});
 	
 	if( user == null){
 		//User.destroy({ t	runcate: true, restartIdentity: true });
-		let maxId = await User.findOne({ attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']] });
+		let maxId = await User.findOne({ attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']] }); 
 
 		let newUser = await User.create({id:maxId.id+1, nickname:nickname,babyDue:babyDue, weightBeforePregnancy:weightBeforePregnancy, weightNow:weightNow, heightNow:heightNow, kakaoId:kakaoId, babyName:""});
 		console.log('[LOG]NEW USER' + 'id : ' + newUser.id + ', nickname : ' + newUser.nickname);
 
 		maxId = await HistoryBodyType.findOne({attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']] });
 
-		let newBodyHistory = await HistoryBodyType.create({id:maxId.id+1, user_id:newUser.id, body_type_id:DEFAULT_BODY_TYPE});
+		let newBodyHistory = await HistoryBodyType.create({id:maxId.id+1, user_id:newUser.id, body_type_id:DEFAULT_BODY_TYPE, createdAt:todayKTC()});
 		console.log('[LOG]NEW Body History' + newBodyHistory.body_type_id);
 
 		const sendResult = {
@@ -61,6 +62,7 @@ exports.withdrawal = async(req, res)=>{
 	const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+		return;
     }
 	const user = await getUserDday(kakaoId,new Date(req.body.date));
 	
@@ -99,6 +101,7 @@ exports.login = async (req,res) => {
 
 	if( user == null){
 		res.status(400).json({success:false, message: '해당 kakaoId를 가진 사용자가 없습니다.'});
+		return;
 	}
 
 	// const token = await jwt.sign({
@@ -130,45 +133,44 @@ exports.bodyTypeGlb = async (req, res) => {
 	formdata.append('file', filedata, req.file.filename);
 	await axios.post('http://125.129.117.140:4500/upload',formdata,{
 		headers:formdata.getHeaders()
-	}).then(res=>{
+	}).then(async function res(res){
 		
 		let {bodyComment, workoutComment} = shapeToStr(res.data.genuVarum, res.data.pelvicImbalance, res.data.pelvicTilt);
 		result.bodyComment = bodyComment;
 		result.workoutComment = workoutComment;
 		result.glbURL = 'http://125.129.117.140:4500' + res.data.glbURL;
+		
+		if(res.data.genuVarum == "O_Leg"){
+			await HistoryBodyType.create({id:maxId.id+1, user_id:newUser.id, body_type_id:O_LEG_BODY_TYPE, createdAt:todayKTC()});
+		}
+		if(res.data.genuVarum == "X_Leg"){
+			await HistoryBodyType.create({id:maxId.id+1, user_id:newUser.id, body_type_id:X_Leg_BODY_TYPE, createdAt:todayKTC()});
+		}
+		if(res.data.pelvicImbalance == "Left"){
+			await HistoryBodyType.create({id:maxId.id+1, user_id:newUser.id, body_type_id:PELVICIMBALANCE_BODY_TYPE, createdAt:todayKTC()});
+		}
+		if(res.data.pelvicImbalance == "Right"){
+			await HistoryBodyType.create({id:maxId.id+1, user_id:newUser.id, body_type_id:PELVICIMBALANCE_BODY_TYPE, createdAt:todayKTC()});
+		}
+		if(res.data.pelvicTilt == "Anterior"){
+			await HistoryBodyType.create({id:maxId.id+1, user_id:newUser.id, body_type_id:ANTERIOR_BODY_TYPE, createdAt:todayKTC()});
+		}
+		if(res.data.pelvicTilt == "Posterior"){
+			await HistoryBodyType.create({id:maxId.id+1, user_id:newUser.id, body_type_id:POSTERIOR_BODY_TYPE, createdAt:todayKTC()});
+		}
+		await HistoryBodyType.create({id:maxId.id+1, user_id:newUser.id, body_type_id:DEFAULT_BODY_TYPE, createdAt:todayKTC()});
 		console.log(res.data)
 		// return axios.get('http://125.129.117.140:4500' + res.data.glbURL)
 	})
-	// .then(res => {
-	// 	console.log(res)
-	// 	const s3 = new AWS.S3({
-	// 		accessKeyId:process.env.AWS_ACCESS_KEY,
-	// 		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-	// 		region:'ap-northeast-2'
-	// 	});
-
-	// 	let param = {
-	// 		'Bucket':'momsptbucket',
-	// 		'Key':'glb/' + (req.file.filename).split('.')[0] + '.glb',
-	// 		'ACL':'public-read',
-	// 		'Body':res.data,
-	// 		'ContentType':'model/gltf-binary'
-	// 	}
-		
-	// 	s3.upload(param, function(err, data){
-	// 		if(err) {
-	// 			console.log(err);
-	// 		}
-	// 		console.log(data);
-	// 	});
-	// 	console.log('s3 업로드 완료')
-
-	// 	const prefix = 'https://momsptbucket.s3.ap-northeast-2.amazonaws.com/glb/';
-
-	// 	result.glbURL = prefix + (req.file.filename).split('.')[0] +  '.glb'
-	// })
 	.catch(err=>console.log(err))
 	
+	fs.access(filePath, fs.constants.F_OK, (err)=>{
+        if(err) return console.log('삭제 불가능 파일');
+
+        fs.unlink(filePath, (err)=> err?
+        console.log(err) : console.log(`${filePath}를 정상적으로 삭제하였습니다.`));    
+    });
+
 	res.send(result);
 }
 

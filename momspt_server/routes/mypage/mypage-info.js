@@ -23,12 +23,14 @@ exports.mypageInfomation = async (req,res) =>{
 
     if(kakaoId < 0){
         res.status(401).json(KAKAO_AUTH_FAIL);
+        return;
     }
     
     const userInfo = await getUserDday(kakaoId,todayKTC());
     const user = await User.findOne({where:{id:userInfo.id}});
     if( user == null){
 		res.status(400).json(DATA_NOT_MATCH);
+        return;
 	}
 
     let dayAfterBabyDue = millisecondtoDay(todayKTC() - user.babyDue);
@@ -48,12 +50,14 @@ exports.changeInfomation = async(req,res) =>{
 
     if(kakaoId < 0){
         res.status(401).json(KAKAO_AUTH_FAIL);
+        return;
     }
     const userInfo = await getUserDday(kakaoId,todayKTC());
 
     const updateUser = await User.update({nickname:req.body.nickname, babyName:req.body.babyName}, {where: {id:userInfo.id}});
     if (updateUser != 1){
         res.status(400).send(UPDATE_FAIL)
+        return;
     }
 
     res.status(200).send({success:true, message:'정상적으로 요청을 수행했습니다.'})
@@ -64,11 +68,13 @@ exports.setProfile = async (req,res)=> {
     const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+        return;
     }
 
     const userInfo = await getUserDday(kakaoId,todayKTC());
     if ( !userInfo.id <0){
         res.status(400).json(DATA_NOT_MATCH);
+        return;
     }
     
     const prefix = 'https://momsptbucket.s3.ap-northeast-2.amazonaws.com/profile/';

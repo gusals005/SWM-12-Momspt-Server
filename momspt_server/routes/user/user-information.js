@@ -9,12 +9,14 @@ exports.getDayComment = async (req, res) => {
 	
 	if(kakaoId < 0){
 		res.status(401).json(KAKAO_AUTH_FAIL);
+		return;
 	}
 
 	const userInfo = await getUserDday(kakaoId, todayKTC());
 	const user  = await User.findOne({where:{id:userInfo.id}});
 	if( user == null){
 		res.status(400).json(DATA_NOT_MATCH);
+		return;
 	}
 
 	let d_day = (todayKTC() - user.babyDue)/(1000*3600*24);

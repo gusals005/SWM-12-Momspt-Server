@@ -5,6 +5,11 @@ const HistoryBodyType = db.history_body_type;
 const {Op} = require('sequelize');
 
 const DEFAULT_BODY_TYPE = 1;
+const ANTERIOR_BODY_TYPE = 2;
+const O_LEG_BODY_TYPE = 3;
+const POSTERIOR_BODY_TYPE = 4;
+const X_Leg_BODY_TYPE = 5;
+const PELVICIMBALANCE_BODY_TYPE = 6;
 
 async function kakaoAuthCheck(req){
 	const token = req.headers['x-access-token'];
@@ -50,6 +55,7 @@ async function kakaoAuth(access_token){
 	//console.log("LOG : " + nickname + " 의 출산일 : " + nicknameuser.dataValues.babyDue);
 	
 	var targetDay = (date - user.dataValues.babyDue)/(1000*3600*24);
+	console.log('[LOG]targetDay',targetDay);
 	targetDay = Math.floor(targetDay);
 	
 	const userId = user.dataValues.id;
@@ -102,5 +108,6 @@ module.exports = {
     getUserDday,
     todayKTC,
 	findBodyType,
-	DEFAULT_BODY_TYPE
+	DEFAULT_BODY_TYPE, ANTERIOR_BODY_TYPE, O_LEG_BODY_TYPE,
+	POSTERIOR_BODY_TYPE, X_Leg_BODY_TYPE, PELVICIMBALANCE_BODY_TYPE
 }

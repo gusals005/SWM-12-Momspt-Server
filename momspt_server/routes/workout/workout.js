@@ -1,6 +1,6 @@
 const fs = require('fs');
 const db = require("../../database/models");
-const { DATA_NOT_MATCH, DATA_NOT_EXIST } = require('../jsonformat');
+const { DATA_NOT_MATCH, DATA_NOT_EXIST, KAKAO_AUTH_FAIL } = require('../jsonformat');
 const { kakaoAuthCheck, getUserDday, todayKTC, findBodyType, DEFAULT_BODY_TYPE} = require('../utils');
 const User = db.user;
 const Workout = db.workout;
@@ -24,6 +24,7 @@ exports.getTodayWorkoutList = async (req, res) => {
 	const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+		return;
     }
 
 	let result = await getWorkoutList(kakaoId, todayKTC());
@@ -34,6 +35,7 @@ exports.getDayWorkoutList = async (req,res) => {
 	const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+		return;
     };
 
 	let targetDay = await convertSteptoDay(req.body.step, req.body.day);
@@ -51,6 +53,7 @@ exports.getInfo = async (req, res) => {
 	const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+		return;
     }
 
 	let workout = await Workout.findOne({ attributes:{exclude:['createdAt','updatedAt']}, where : {workoutCode:req.query.workoutcode}});
@@ -71,12 +74,14 @@ exports.sendResult = async (req,res) => {
 	const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+		return;
     }
 
 	const user = await getUserDday(kakaoId,new Date(req.body.date));
 	
     if ( !user.id <0){
         res.status(400).json(DATA_NOT_MATCH);
+		return;
     }
 	
 	const searchTargetRows = await HistoryWorkout.findAll({where: {user_id:user.id, date:user.targetDay, workout_id:req.body.workout_id}});
@@ -111,6 +116,7 @@ exports.getJson = async (req,res) => {
 	const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+		return;
     }
 
     const s3 = new AWS.S3({
@@ -131,9 +137,7 @@ exports.getJson = async (req,res) => {
 		if(err){
 			console.log('[LOG]ERROR', err);
 			res.status(400).send(DATA_NOT_EXIST);
-		}
-			
-		else{
+		}else{
 			//console.log(data.Body.toString());
 			json = data.Body.toString();
 			res.status(200).send(json);
@@ -147,6 +151,7 @@ exports.weeklyWorkoutStatistics = async (req,res) => {
 	const kakaoId = await kakaoAuthCheck(req);
     if( kakaoId < 0 ){
         res.status(401).json(KAKAO_AUTH_FAIL);
+		return;
     }
 
 	//오늘이 출산일 이후 며칠인지 계산.
@@ -208,6 +213,7 @@ async function getWorkoutList(kakaoId, date){
 	const user = await getUserDday(kakaoId, date);
     if ( !user.id <0){
         res.status(400).json(DATA_NOT_MATCH);
+		return;
     }
 	
 	let workoutIdList = [];
