@@ -37,6 +37,13 @@ exports.signup = async (req,res) => {
 		let newBodyHistory = await HistoryBodyType.create({id:maxId.id+1, user_id:newUser.id, body_type_id:DEFAULT_BODY_TYPE, createdAt:todayKTC()});
 		console.log('[LOG]NEW Body History' + newBodyHistory.body_type_id);
 
+		
+		let targetDay = (todayKTC() - newUser.babyDue)/(1000*3600*24);
+		targetDay = Math.floor(targetDay);
+		console.log(targetDay)
+		let newWeight = await HistoryWeight.create({id:maxId.id+1, user_id:newUser.id, weight:weightNow, date:targetDay, createdAt:todayKTC()})
+										.catch((err)=>{	console.log(err);});
+
 		const sendResult = {
 			"message":"Success",
 			"user":{
