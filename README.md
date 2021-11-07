@@ -1,16 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
 # [서버] README.md
 
 # 목차
@@ -49,9 +36,9 @@
 
 # 시스템 구성도
 
-![Untitled](/uploads/c92ec4cf1806cbeed9ea1e630e089445/Untitled.png)
+<img style="max-width: 80%; height: auto;" src="/uploads/c92ec4cf1806cbeed9ea1e630e089445/Untitled.png" width="70%"> 
 
-![Untitled_1](/uploads/7c98886e229122f7bbcf137f3ce93b1e/Untitled_1.png)
+<img style="max-width: 80%; height: auto;" src="/uploads/7c98886e229122f7bbcf137f3ce93b1e/Untitled_1.png" width="70%"> 
 
 ### Service server 기술 스택
 
@@ -188,3 +175,49 @@ Blazepose에서 제공 영상에서의 사람과 운동을 수행하는 사람�
     - 다운로드한 `GLB` 파일을 3D 뷰어에 로드
 
 # Screenshots
+
+
+- **Sign in**
+
+<img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140649658-c3f010df-0129-4161-961d-334f4971f383.gif" width="32%"> 
+
+
+- **Today's recommended Workout**
+
+<img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140651996-cb0a3c84-1771-4604-9c6a-ae507eeb7b25.png" width="32%"> <img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140651999-c5df4e50-b005-419f-b5fb-f4dca715c31c.png" width="32%"> <img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140651984-f8581177-b827-4cbe-a11f-c8418bfba8b6.png" width="32%">
+
+
+- **Workout Detail**
+
+<img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140650750-efed904b-f41d-495e-b864-736c27eb7daa.png" width="32%"> <img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140650569-e0321042-fd03-4f41-99a0-c8438fda21d4.png" width="32%">
+
+
+- **AI assit workout**
+
+<img style="max-width: 50%; height: auto;" width="100%" src="https://user-images.githubusercontent.com/54823396/140650913-590b171b-d681-4791-9c3e-35752838b425.png">
+
+
+- **Daily Statistics**
+
+<img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140649468-8e765fce-14d8-4e48-b441-50c5108c9709.png" width="32%"> <img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140649494-b4fddd69-ae93-4d0b-9a71-16051ef1f6ae.png" width="32%"> <img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140649505-3346b48e-bca9-4665-8fd4-a8ae7e472b9e.png" width="32%">
+
+<img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140649537-c17a53b0-3aba-4f46-86fb-d3d08208c84d.png" width="32%"> <img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140649550-7d25f4c7-c64c-43d3-99c1-c48d7f7b853b.png" width="32%">
+
+
+- **Body analysis**
+
+<img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140652901-fcea138c-fc53-48b3-937d-1f78daea31c1.gif" width="32%"> <img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140652639-8d189421-7620-4ce2-a9e7-77222574606f.gif" width="32%"> <img style="max-width: 50%; height: auto;" src="https://user-images.githubusercontent.com/54823396/140652640-e927e399-f77c-4d8c-8826-3001052cbba7.gif" width="32%">
+
+
+- **My Page**
+
+<img style="height: auto;" width="64%" src="https://user-images.githubusercontent.com/54823396/140651306-8a7c3494-680f-4e97-a9b2-82b3e5157fb2.png">
+
+
+## Team
+|Part|Name|
+|------|---|
+|머신러닝|이인서|
+|서버, 운동 분석 알고리즘|이현민|
+|안드로이드|박해민|
+
