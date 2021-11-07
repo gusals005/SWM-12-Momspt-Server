@@ -45,6 +45,7 @@ exports.signup = async (req,res) => {
 										.catch((err)=>{	console.log(err);});
 
 		const sendResult = {
+			"success":"true",
 			"message":"Success",
 			"user":{
 				"nickname":newUser.nickname,   
@@ -128,7 +129,14 @@ exports.login = async (req,res) => {
 
 
 exports.bodyTypeGlb = async (req, res) => {
-	// request 는 video
+	//console.log(req.query);
+	const kakaoId = await kakaoAuthCheck(req);
+	
+	if(kakaoId < 0){
+		res.status(401).json(KAKAO_AUTH_FAIL);
+		return;
+	}
+	let newUser = await getUserDday(kakaoId, todayKTC());
 	console.log(req.file)
     
     var filePath = path.join(__dirname, '../..', 'uploads' ,req.file.filename);
