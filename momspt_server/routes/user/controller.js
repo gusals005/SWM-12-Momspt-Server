@@ -146,6 +146,8 @@ exports.bodyTypeGlb = async (req, res) => {
 		result.bodyComment = bodyComment;
 		result.workoutComment = workoutComment;
 		result.glbURL = 'http://125.129.117.140:4500' + res.data.glbURL;
+
+		let maxId = await HistoryBodyType.findOne({attributes: [[Sequelize.fn('MAX', Sequelize.col('id')), 'id']] });
 		
 		if(res.data.genuVarum == "O_Leg"){
 			await HistoryBodyType.create({id:maxId.id+1, user_id:newUser.id, body_type_id:O_LEG_BODY_TYPE, createdAt:todayKTC()});
