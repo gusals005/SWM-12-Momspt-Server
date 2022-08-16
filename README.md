@@ -36,9 +36,9 @@
 
 # 시스템 구성도
 
-<img style="max-width: 80%; height: auto;" src="https://s3.us-west-2.amazonaws.com/secure.notion-static.com/65e5899a-3a05-458c-9477-de5e54eebb1c/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20211115%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20211115T073240Z&X-Amz-Expires=86400&X-Amz-Signature=186cc9b882d7d451cc195ec8c18db164fbe2e60b44dfc5c96b2f60ee29618f87&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22" width="70%"> 
+<img style="max-width: 80%; height: auto;" src="https://user-images.githubusercontent.com/33320291/184875156-4257f11e-39ba-4a4b-8e76-faf44d05383d.png" width="70%"> 
 
-<img style="max-width: 80%; height: auto;" src="https://s3.us-west-2.amazonaws.com/secure.notion-static.com/a7fb11d9-1c7b-4f23-b333-d40e7e4605ab/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20211115%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20211115T073311Z&X-Amz-Expires=86400&X-Amz-Signature=84ea45e107023cc1be6bfafa017222d8fcec50901abdd4ae138aeeba664699d2&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22" width="70%"> 
+<img style="max-width: 80%; height: auto;" src="https://user-images.githubusercontent.com/33320291/184875265-4c50a773-b105-455d-acf7-e4814fdebee1.png" width="70%"> 
 
 ### Service server 기술 스택
 
@@ -102,7 +102,7 @@ Nginx 및 Node.js 웹 서버에 대해서는 Docker를 활용하여 모두 이�
 
 ## 운동 수행시 분석 알고리즘 설명
 
-![Untitled_2](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/357ae350-7e91-4dd0-b8fa-b1ab1b5dd03c/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20211115%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20211115T073346Z&X-Amz-Expires=86400&X-Amz-Signature=64d2a280cef588bc0e12c040ebdc70d3242d723149bf3ffb81440ef1c78cd605&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22)
+![Untitled 2](https://user-images.githubusercontent.com/33320291/184875436-7a1964e1-61dc-4e57-8ef6-2c9705cf393a.png)
 
 운동 동작 분석은 제공 영상과의 **유사도 분석**과 운동 횟수를 세는 **횟수 측정**이 있습니다.
 
@@ -145,12 +145,11 @@ Blazepose에서 제공 영상에서의 사람과 운동을 수행하는 사람�
 
 # APIs - 서비스 전체 API
 
-![Untitled_3](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/1f67445b-59e7-4e2c-9313-6a94054e76a8/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20211115%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20211115T073429Z&X-Amz-Expires=86400&X-Amz-Signature=f094037cf597b410090db9497c92ba840b41af379750ccd1f34482cfb6ff7628&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22)
+![Untitled 3](https://user-images.githubusercontent.com/33320291/184875514-10dcb3c4-48ef-46d6-8c44-3614d53ac0c9.png)
 
-![Untitled_4](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/5e024dea-7583-4765-b906-dfa6bb9343a4/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20211115%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20211115T073440Z&X-Amz-Expires=86400&X-Amz-Signature=3f25cb55cdf356707001fbfc4cc545b4343147e61362267d85463aefb2e29dec&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22)
+![Untitled 4](https://user-images.githubusercontent.com/33320291/184875523-187e6c35-25f6-4743-9050-35b16ef75fa5.png)
 
-![Untitled_5](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/b5116316-f34e-4e46-bcbf-0ee50d5313b7/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20211115%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20211115T073451Z&X-Amz-Expires=86400&X-Amz-Signature=d8e14e3d697bd3c5f49c750ae50b090624a8854698c62166b65463c1a5c769a3&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22Untitled.png%22)
-
+![Untitled 5](https://user-images.githubusercontent.com/33320291/184875529-148a12c0-f85a-4ac6-8a08-04ee487fad85.png)
 
 # MomsPT 애플리케이션 화면 소개(Android)
 
